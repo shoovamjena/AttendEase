@@ -38,3 +38,7 @@ val Typography = Typography(
      Font(R.font.coiny_regular, FontWeight.Normal),
      Font(R.font.coiny_regular, FontWeight.ExtraBold)
  )
+val nothingFontFamily = FontFamily(
+    Font(R.font.nothing_font, FontWeight.Normal),
+    Font(R.font.nothing_font, FontWeight.ExtraBold)
+)
