@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -28,8 +30,12 @@ import com.example.attendease.ui.theme.nothingFontFamily
 
 @Composable
 fun AddSubject(
-    text: String,
-    onTextChange: (String) -> Unit,
+    subName: String,
+    onSubNameChange: (String) -> Unit,
+    clasesAtended: String,
+    onClassesAttendChange: (String) ->Unit,
+    totalClasses: String,
+    onTotalClassesChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     containerColor: Color = MaterialTheme.colorScheme.onPrimary,
@@ -46,7 +52,7 @@ fun AddSubject(
                 .fillMaxWidth()
                 .padding(16.dp)
                 .background(
-                    color = containerColor.copy(alpha = 0.7f),
+                    color = containerColor.copy(alpha = 1f),
                     shape = RoundedCornerShape(16.dp)
                 )
                 .padding(16.dp)
@@ -67,46 +73,48 @@ fun AddSubject(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 10.dp),
-                    value = text,
-                    onValueChange = onTextChange,
+                    value = subName,
+                    onValueChange = onSubNameChange,
                     label = {Text(text ="Add Subject") },
                     placeholder = {Text(text="Enter your Subject name", fontSize = 11.sp)},
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
                 )
                 OutlinedTextField(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 10.dp),
-                    value = text,
-                    onValueChange = onTextChange,
-                    label = {Text(text ="Total Classes") },
-                    placeholder = {Text(text="Enter total number of classes", fontSize = 11.sp)},
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 10.dp),
-                    value = text,
-                    onValueChange = onTextChange,
+                    value = clasesAtended,
+                    onValueChange = onClassesAttendChange,
                     label = {Text(text ="Classes Attended") },
                     placeholder = {Text(text="Enter number of classes attended", fontSize = 11.sp)},
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp),
+                    value = totalClasses,
+                    onValueChange = onTotalClassesChange,
+                    label = {Text(text ="Total Classes") },
+                    placeholder = {Text(text="Enter total number of classes", fontSize = 11.sp)},
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    isError = totalClasses<clasesAtended
                 )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    TextButton(onClick = onDismiss) {
-                        Text(text = "Cancel", color = MaterialTheme.colorScheme.primary)
+                    Button(onClick = onDismiss) {
+                        Text(text = "Cancel", color = MaterialTheme.colorScheme.onPrimary)
                     }
-                    TextButton(onClick = onConfirm) {
+                    OutlinedButton(onClick = onConfirm) {
                         Text(text = "Confirm", color = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
         }
-        }
+    }
 }
+
 
