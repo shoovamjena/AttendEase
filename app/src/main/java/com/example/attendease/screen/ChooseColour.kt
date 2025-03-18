@@ -1,150 +1,117 @@
 package com.example.attendease.screen
 
 import android.content.Intent
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.*
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.lifecycleScope
 import com.example.attendease.MainActivity
 import com.example.attendease.UserPreferences
+import com.example.attendease.color.ColorComponent
+import com.example.attendease.color.ColorList
+import com.example.attendease.color.Data
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlin.math.hypot
 
 @Composable
 fun ChooseColorScreen() {
+    val colors = remember { Data.colors }
+    var previousBackgroundColor by remember { mutableStateOf(colors.first()) }
+    var currentBackgroundColor by remember { mutableStateOf(colors.first()) }
+    val (width, height) = with(LocalConfiguration.current) {
+        with(LocalDensity.current) { screenWidthDp.dp.toPx() to screenHeightDp.dp.toPx() }
+    }
+    val maxRadiusPx = hypot(width, height)
+    var radius by remember { mutableFloatStateOf(0f) }
+    var clickedOffset: Offset? by remember { mutableStateOf(null) }
+    val animatedRadius = remember { Animatable(0f) }
     val context = LocalContext.current
     val userPreferences = remember { UserPreferences(context) }
     val coroutineScope = rememberCoroutineScope()
+    var selectedColor by remember { mutableStateOf(Color.Transparent) }
+    LaunchedEffect(key1 = true) {
+        snapshotFlow { currentBackgroundColor }.collectLatest {
+            animatedRadius.animateTo(
+                maxRadiusPx,
+                animationSpec = tween(500, easing = LinearEasing)
+            ) {
+                radius = value
 
-    var selectedColor by remember { mutableStateOf(Color.Red) }
-    val colorPickerState = remember { mutableStateOf(false) } // To toggle the color picker
+            }
+            animatedRadius.animateTo(0f, animationSpec = tween(durationMillis = 50)) {
+                previousBackgroundColor = currentBackgroundColor
+            }
+        }
+    }
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = "Choose Your Theme Color", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .background(selectedColor, CircleShape)
-                .clickable { colorPickerState.value = true } // Open color picker on click
-                .border(2.dp, Color.Black, CircleShape)
-        )
-
-        Spacer(modifier = Modifier.height(40.dp))
-
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .drawWithCache {
+            onDrawBehind {
+                drawRect(
+                    Brush.linearGradient(
+                        listOf(
+                            previousBackgroundColor.startColor, previousBackgroundColor.endColor
+                        )
+                    )
+                )
+                drawCircle(
+                    brush = Brush.linearGradient(
+                        listOf(
+                            currentBackgroundColor.startColor, currentBackgroundColor.endColor
+                        )
+                    ),
+                    radius = radius,
+                    center = clickedOffset ?: Offset(size.width / 2, size.height / 2),
+                )
+            }
+        }) {
+        ColorList(visibleItems = 3,
+            modifier = Modifier.fillMaxWidth(),
+            onItemClick = { selectedIndex, offset ->
+                clickedOffset = offset
+                currentBackgroundColor = colors[selectedIndex]
+                selectedColor = colors[selectedIndex].startColor
+            }) {
+            colors.forEachIndexed { index, color ->
+                ColorComponent(color = color)
+            }
+        }
         Button(onClick = {
             coroutineScope.launch {
                 userPreferences.saveThemeColor(selectedColor.toArgb())
                 val intent = Intent(context, MainActivity::class.java)
                 context.startActivity(intent)
             }
-        }) {
-            Text("CONFIRM")
-        }
-
-        // Show color picker dialog when clicked
-        if (colorPickerState.value) {
-            ColorPickerDialog(
-                selectedColor = selectedColor,
-                onColorSelected = { color ->
-                    selectedColor = color
-                    colorPickerState.value = false
-                },
-                onDismiss = { colorPickerState.value = false }
-            )
-        }
-    }
-}
-
-/**
- * Custom Color Picker Dialog
- */
-@Composable
-fun ColorPickerDialog(
-    selectedColor: Color,
-    onColorSelected: (Color) -> Unit,
-    onDismiss: () -> Unit
-) {
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+        },
+            modifier = Modifier.align(Alignment.BottomCenter)
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = "Pick a Color", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                var red by remember { mutableStateOf(selectedColor.red) }
-                var green by remember { mutableStateOf(selectedColor.green) }
-                var blue by remember { mutableStateOf(selectedColor.blue) }
-
-                // Red Slider
-                Text("Red: ${(red * 255).toInt()}")
-                Slider(
-                    value = red,
-                    onValueChange = { red = it },
-                    valueRange = 0f..1f,
-                    colors = SliderDefaults.colors(thumbColor = Color.Red, activeTrackColor = Color.Red)
-                )
-
-                // Green Slider
-                Text("Green: ${(green * 255).toInt()}")
-                Slider(
-                    value = green,
-                    onValueChange = { green = it },
-                    valueRange = 0f..1f,
-                    colors = SliderDefaults.colors(thumbColor = Color.Green, activeTrackColor = Color.Green)
-                )
-
-                // Blue Slider
-                Text("Blue: ${(blue * 255).toInt()}")
-                Slider(
-                    value = blue,
-                    onValueChange = { blue = it },
-                    valueRange = 0f..1f,
-                    colors = SliderDefaults.colors(thumbColor = Color.Blue, activeTrackColor = Color.Blue)
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Preview Color
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .background(Color(red, green, blue), CircleShape)
-                        .border(2.dp, Color.Black, CircleShape)
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Row(horizontalArrangement = Arrangement.SpaceBetween) {
-                    Button(onClick = onDismiss) { Text("Cancel") }
-                    Button(onClick = { onColorSelected(Color(red, green, blue)) }) { Text("OK") }
-                }
-            }
+            Text("CONFIRM")
         }
     }
 }

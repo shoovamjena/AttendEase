@@ -68,4 +68,5 @@ dependencies {
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx) // Coroutine support
     implementation(libs.atomicfu)
+    implementation(libs.colorpicker.compose)
 }

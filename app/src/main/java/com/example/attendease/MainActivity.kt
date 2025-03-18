@@ -396,7 +396,8 @@ fun SubjectItem(subject: Subject, onPresent: () -> Unit, onAbsent: () -> Unit, o
                     }
                 }
 
-                else -> "Your attendance is 75%.\n Maintain it!"
+                else -> "You can't miss\n" +
+                        " your next class"
             }
         }
     }
