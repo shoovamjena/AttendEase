@@ -13,17 +13,16 @@ import java.util.Calendar
 @Composable
 fun TimeBasedGreeting (){
     val currentTime = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    val contentColor = MaterialTheme.colorScheme.primary
-    val greetingMessage = when{
-        currentTime in 4..11 -> "Good Morning!!"
-        currentTime in 12..15 -> "Good Afternoon!!"
-        currentTime in 16..22 -> "Good Evening!!"
+    val greetingMessage = when (currentTime) {
+        in 4..11 -> "Good Morning!!"
+        in 12..15 -> "Good Afternoon!!"
+        in 16..22 -> "Good Evening!!"
         else -> "Good Night!!"
     }
 
     Text(
         text = greetingMessage,
-        color = contentColor,
+        color = MaterialTheme.colorScheme.tertiary,
         fontSize = 32.sp,
         fontFamily = nothingFontFamily,
         fontWeight = FontWeight.ExtraBold,
