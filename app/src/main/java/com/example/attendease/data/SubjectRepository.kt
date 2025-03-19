@@ -25,4 +25,8 @@ class SubjectRepository(private val subjectDao: SubjectDao) {
      fun absent(subject: Subject){
         subjectDao.markAbsent(subject.id)
     }
+
+    fun resetAttendance(subject: Subject){
+        subjectDao.resetAttendance(subject.id)
+    }
 }

@@ -50,6 +50,10 @@ class SubjectViewModel(private val repository: SubjectRepository) : ViewModel() 
         viewModelScope.launch(Dispatchers.IO) { repository.absent(subject) }
     }
 
+    fun resetAttendance(subject: Subject){
+        viewModelScope.launch(Dispatchers.IO){ repository.resetAttendance(subject) }
+    }
+
     fun updateSubject(id: Int,newName: String, newAttend: Int, newTotal: Int){
         viewModelScope.launch(Dispatchers.IO) {
             val subject = Subject(id = id, name = newName, attend = newAttend, total = newTotal)
