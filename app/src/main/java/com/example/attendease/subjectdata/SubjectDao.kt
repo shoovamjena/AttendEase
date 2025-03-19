@@ -1,4 +1,4 @@
-package com.example.attendease.data
+package com.example.attendease.subjectdata
 
 import androidx.room.Dao
 import androidx.room.Delete

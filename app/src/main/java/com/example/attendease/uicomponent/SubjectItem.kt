@@ -39,7 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.attendease.R
-import com.example.attendease.data.Subject
+import com.example.attendease.subjectdata.Subject
 import com.example.attendease.ui.theme.nothingFontFamily
 import kotlin.math.ceil
 
@@ -52,7 +52,7 @@ fun SubjectItem(subject: Subject, onPresent: () -> Unit, onAbsent: () -> Unit, o
     val adviceText by remember(subject.attend, subject.total) {
         derivedStateOf {
             when {
-                subject.attendancePercentage < requiredPercentage -> {
+                (subject.attendancePercentage < requiredPercentage && subject.attendancePercentage!=0) -> {
                     val neededClasses = ceil((0.75 * subject.total - subject.attend) / 0.25).toInt()
                     "You need to attend\n next $neededClasses classes"
                 }
@@ -63,6 +63,10 @@ fun SubjectItem(subject: Subject, onPresent: () -> Unit, onAbsent: () -> Unit, o
                         skipableClasses > 0 -> "You may leave\n $skipableClasses classes "
                         else -> "You can't miss\n your next class"
                     }
+                }
+
+                subject.attendancePercentage == 0 -> {
+                    "New Session Begins!!"
                 }
 
                 else -> "You can't miss\n" +

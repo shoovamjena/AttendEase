@@ -17,7 +17,12 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -34,14 +39,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.attendease.AddSubject
 import com.example.attendease.EditSubject
 import com.example.attendease.TimeBasedGreeting
-import com.example.attendease.data.Subject
+import com.example.attendease.subjectdata.Subject
 import com.example.attendease.model.SubjectViewModel
 import com.example.attendease.ui.theme.coinyFontFamily
 import com.example.attendease.ui.theme.nothingFontFamily
@@ -63,10 +72,15 @@ fun HomeScreen(userName: String, selectedColor: Int?,viewModel: SubjectViewModel
         selectColor // Use the selected theme color from ChooseColorScreen
     }
     val contentColor = if (isAndroid12OrAbove) {
-        MaterialTheme.colorScheme.primaryContainer
+        MaterialTheme.colorScheme.onPrimary
     } else {
         selectColor // Use the selected theme color from ChooseColorScreen
     }
+
+    val density = LocalDensity.current
+    val gradientEndOffset = with(density) { 100.dp.toPx() }
+
+    var expanded by remember { mutableStateOf(false) }
 
     fun resetFields() {
         text = ""
@@ -171,17 +185,68 @@ fun HomeScreen(userName: String, selectedColor: Int?,viewModel: SubjectViewModel
                             fontWeight = FontWeight.ExtraBold,
 
                             )
+                        Box{
 
                         IconButton(
-                            onClick = { },
+                            onClick = { expanded=true },
                             colors = IconButtonDefaults.iconButtonColors(contentColor.copy(alpha = 0.2f)),
                             modifier = Modifier.size(36.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
                                 contentDescription = "Settings",
-                                tint = MaterialTheme.colorScheme.primary // Icon color
+                                tint = MaterialTheme.colorScheme.onTertiary // Icon color
                             )
+                        }
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                            modifier = Modifier
+                                .background(backgroundColor.copy(alpha = 0.5f))
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(text = "Edit Subject", fontSize = 14.sp) },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Edit,
+                                        contentDescription = "Edit",
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                },
+                                onClick = {
+
+                                    expanded = false
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(text = "Delete Subject", fontSize = 14.sp) },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = "Delete",
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                },
+                                onClick = {
+
+                                    expanded = false
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(text = "Reset", fontSize = 14.sp) },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Refresh,
+                                        contentDescription = "Reset Attendance",
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                },
+                                onClick = {
+
+                                    expanded = false
+                                },
+                            )
+                        }
                         }
                     }
                 }
@@ -202,7 +267,25 @@ fun HomeScreen(userName: String, selectedColor: Int?,viewModel: SubjectViewModel
                         .clip(
                             RoundedCornerShape(20.dp)
                         )
-                        .background(contentColor.copy(alpha = 0.1f))
+                        .drawWithCache {
+                            onDrawBehind {
+                                // Draw Background Gradient
+                                drawRect(
+                                    Brush.linearGradient(
+                                        colors =listOf(
+                                            Color.White.copy(alpha = 1f),
+                                            Color.White
+                                        ),
+                                        start = Offset(0f,size.height),
+                                        end = Offset(0f,size.height-gradientEndOffset)
+                                    )
+                                )
+
+
+                            }
+                        }
+                        .background(contentColor.copy(alpha = 0.5f))
+
                         .weight(1f)
                 ) {
                     val subjects by viewModel.subjects.collectAsState()

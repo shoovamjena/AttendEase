@@ -14,8 +14,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.example.attendease.data.SubjectDatabase
-import com.example.attendease.data.SubjectRepository
+import com.example.attendease.subjectdata.SubjectDatabase
+import com.example.attendease.subjectdata.SubjectRepository
 import com.example.attendease.model.SubjectViewModel
 import com.example.attendease.model.SubjectViewModelFactory
 import com.example.attendease.screen.ChooseColorScreen

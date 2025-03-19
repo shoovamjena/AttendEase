@@ -1,4 +1,4 @@
-package com.example.attendease.data
+package com.example.attendease.subjectdata
 
 import kotlinx.coroutines.flow.Flow
 

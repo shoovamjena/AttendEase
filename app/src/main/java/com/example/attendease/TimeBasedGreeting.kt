@@ -16,8 +16,7 @@ fun TimeBasedGreeting (){
     val greetingMessage = when (currentTime) {
         in 4..11 -> "Good Morning!!"
         in 12..15 -> "Good Afternoon!!"
-        in 16..22 -> "Good Evening!!"
-        else -> "Good Night!!"
+        else -> "Good Evening!!"
     }
 
     Text(
