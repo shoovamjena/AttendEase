@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -47,9 +48,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.attendease.AddSubject
-import com.example.attendease.EditSubject
-import com.example.attendease.TimeBasedGreeting
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.attendease.dailogbox.AddSubject
+import com.example.attendease.dailogbox.AttendanceDialog
+import com.example.attendease.dailogbox.EditSubject
+import com.example.attendease.model.DetailViewModel
+import com.example.attendease.uicomponent.TimeBasedGreeting
 import com.example.attendease.subjectdata.Subject
 import com.example.attendease.model.SubjectViewModel
 import com.example.attendease.ui.theme.coinyFontFamily
@@ -57,10 +62,16 @@ import com.example.attendease.ui.theme.nothingFontFamily
 import com.example.attendease.uicomponent.SubjectItem
 
 @Composable
-fun HomeScreen(userName: String, selectedColor: Int?,viewModel: SubjectViewModel) {
+fun HomeScreen(
+    userName: String, selectedColor: Int?,
+    viewModel: SubjectViewModel,
+    viewModel2: DetailViewModel,
+) {
     var addSubjectDialog by rememberSaveable  { mutableStateOf(false) }
     var editSubjectDialog by rememberSaveable { mutableStateOf(false) }
     var selectedSubject by remember { mutableStateOf<Subject?>(null) }
+    var attendDetail by remember { mutableStateOf<Subject?>(null) }
+    var attendanceDialog by rememberSaveable { mutableStateOf(false) }
     var text by remember { mutableStateOf("") }
     var total by remember { mutableStateOf("") }
     var attend by remember { mutableStateOf("") }
@@ -72,14 +83,12 @@ fun HomeScreen(userName: String, selectedColor: Int?,viewModel: SubjectViewModel
         selectColor // Use the selected theme color from ChooseColorScreen
     }
     val contentColor = if (isAndroid12OrAbove) {
-        MaterialTheme.colorScheme.onPrimary
+        MaterialTheme.colorScheme.primaryContainer
     } else {
         selectColor // Use the selected theme color from ChooseColorScreen
     }
 
     val density = LocalDensity.current
-    val gradientEndOffset = with(density) { 100.dp.toPx() }
-
     var expanded by remember { mutableStateOf(false) }
 
     fun resetFields() {
@@ -135,11 +144,13 @@ fun HomeScreen(userName: String, selectedColor: Int?,viewModel: SubjectViewModel
                             newAttend = attended,
                             newTotal = all
                         )
+                        viewModel2.resetAttendance(subject)
                         editSubjectDialog = false
                         resetFields()
                     }
                 }
             },
+
         )
     }
 
@@ -148,7 +159,7 @@ fun HomeScreen(userName: String, selectedColor: Int?,viewModel: SubjectViewModel
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroundColor.copy(alpha = 0.2f))
+            .background(MaterialTheme.colorScheme.onPrimaryContainer)
     ) {
         Row(
             modifier = Modifier
@@ -167,7 +178,7 @@ fun HomeScreen(userName: String, selectedColor: Int?,viewModel: SubjectViewModel
                 ) {
                     Text(
                         text = "Hello",
-                        color = contentColor,
+                        color = MaterialTheme.colorScheme.secondary,
                         fontSize = 32.sp,
                         fontFamily = nothingFontFamily,
                         fontWeight = FontWeight.ExtraBold,
@@ -189,13 +200,13 @@ fun HomeScreen(userName: String, selectedColor: Int?,viewModel: SubjectViewModel
 
                         IconButton(
                             onClick = { expanded=true },
-                            colors = IconButtonDefaults.iconButtonColors(contentColor.copy(alpha = 0.2f)),
+                            colors = IconButtonDefaults.iconButtonColors(contentColor),
                             modifier = Modifier.size(36.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
                                 contentDescription = "Settings",
-                                tint = MaterialTheme.colorScheme.onTertiary // Icon color
+                                tint = MaterialTheme.colorScheme.onTertiaryContainer // Icon color
                             )
                         }
                         DropdownMenu(
@@ -253,7 +264,7 @@ fun HomeScreen(userName: String, selectedColor: Int?,viewModel: SubjectViewModel
                 TimeBasedGreeting()
                 Text(
                     text = "Let's Keep Your Attendance on Point!",
-                    color = contentColor, // Lighter color
+                    color = MaterialTheme.colorScheme.secondary, // Lighter color
                     fontSize = 16.sp,
                     fontFamily = coinyFontFamily,
                     fontWeight = FontWeight.Normal,
@@ -267,24 +278,7 @@ fun HomeScreen(userName: String, selectedColor: Int?,viewModel: SubjectViewModel
                         .clip(
                             RoundedCornerShape(20.dp)
                         )
-                        .drawWithCache {
-                            onDrawBehind {
-                                // Draw Background Gradient
-                                drawRect(
-                                    Brush.linearGradient(
-                                        colors =listOf(
-                                            Color.White.copy(alpha = 1f),
-                                            Color.White
-                                        ),
-                                        start = Offset(0f,size.height),
-                                        end = Offset(0f,size.height-gradientEndOffset)
-                                    )
-                                )
-
-
-                            }
-                        }
-                        .background(contentColor.copy(alpha = 0.5f))
+                        .background(MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.5f))
 
                         .weight(1f)
                 ) {
@@ -305,10 +299,64 @@ fun HomeScreen(userName: String, selectedColor: Int?,viewModel: SubjectViewModel
                                     total = subject.total.toString()
                                     editSubjectDialog = true
                                 },
-                                onReset = {viewModel.resetAttendance(subject)}
+                                onReset = {viewModel.resetAttendance(subject)},
+                                onClick = {attendDetail = subject
+                                    viewModel2.getAttendanceRecords(subject.id)
+                                    attendanceDialog = true
+                                },
+                                viewModel2
                             )
                         }
                     }
+                    attendDetail?.let { subject ->
+                        AttendanceDialog(subject = subject, viewModel = viewModel2, onDismiss = { attendDetail = null })
+                    }
+                    Box (
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(30.dp)
+                            .align(Alignment.BottomCenter)
+                            .drawWithCache {
+                                onDrawBehind {
+                                    // Draw Background Gradient
+                                    drawRect(
+                                        Brush.linearGradient(
+                                            colors =listOf(
+                                                Color.White,
+                                                Color.Transparent
+                                            ),
+                                            start = Offset(0f,size.height),
+                                            end = Offset(0f,0f)
+                                        )
+                                    )
+
+
+                                }
+                            }
+                    ){  }
+                    Box (
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(30.dp)
+                            .align(Alignment.TopCenter)
+                            .drawWithCache {
+                                onDrawBehind {
+                                    // Draw Background Gradient
+                                    drawRect(
+                                        Brush.linearGradient(
+                                            colors =listOf(
+                                                Color.Transparent,
+                                                Color.White
+                                            ),
+                                            start = Offset(0f,size.height),
+                                            end = Offset(0f,0f)
+                                        )
+                                    )
+
+
+                                }
+                            }
+                    ){  }
                     IconButton(
                         onClick = { addSubjectDialog = true },
                         colors = IconButtonDefaults.iconButtonColors(

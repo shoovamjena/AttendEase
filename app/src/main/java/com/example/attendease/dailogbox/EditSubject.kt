@@ -1,4 +1,4 @@
-package com.example.attendease
+package com.example.attendease.dailogbox
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -36,8 +36,9 @@ fun EditSubject(
     onTotalClassesChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    containerColor: Color = MaterialTheme.colorScheme.onPrimary,
+    containerColor: Color = MaterialTheme.colorScheme.onPrimary
 ){
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
@@ -106,7 +107,9 @@ fun EditSubject(
                     Button(onClick = onDismiss) {
                         Text(text = "Cancel", color = MaterialTheme.colorScheme.onPrimary)
                     }
-                    OutlinedButton(onClick = onConfirm) {
+                    OutlinedButton(onClick = {
+                        onConfirm()
+                    }) {
                         Text(text = "Confirm", color = MaterialTheme.colorScheme.primary)
                     }
                 }

@@ -71,9 +71,9 @@ fun WelcomeScreen(
         targetValue = 1f,
         animationSpec = tween(durationMillis = 4000, easing = LinearEasing), label = "",
     )
-    val bgcolor = MaterialTheme.colorScheme.primaryContainer
+    val bgColor = MaterialTheme.colorScheme.primaryContainer
     val textColor = MaterialTheme.colorScheme.secondaryContainer
-    val gradientColors = listOf(bgcolor,textColor)
+    val gradientColors = listOf(bgColor,textColor)
     val animatedBrush = Brush.verticalGradient(
         colors = gradientColors,
         startY = 0f,

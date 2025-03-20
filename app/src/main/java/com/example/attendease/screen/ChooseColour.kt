@@ -98,7 +98,7 @@ fun ChooseColorScreen() {
                 currentBackgroundColor = colors[selectedIndex]
                 selectedColor = colors[selectedIndex].startColor
             }) {
-            colors.forEachIndexed { index, color ->
+            colors.forEachIndexed { _, color ->
                 ColorComponent(color = color)
             }
         }

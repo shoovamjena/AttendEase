@@ -1,6 +1,5 @@
 package com.example.attendease.model
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -62,7 +61,8 @@ class SubjectViewModel(private val repository: SubjectRepository) : ViewModel() 
     }
 }
 
-class SubjectViewModelFactory(private var repository: SubjectRepository,application: Application): ViewModelProvider.Factory{
+@Suppress("UNCHECKED_CAST")
+class SubjectViewModelFactory(private var repository: SubjectRepository): ViewModelProvider.Factory{
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(SubjectViewModel :: class.java)){
             return SubjectViewModel(repository) as T

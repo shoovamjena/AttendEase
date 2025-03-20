@@ -1,6 +1,7 @@
 package com.example.attendease.uicomponent
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CardColors
@@ -39,14 +41,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.attendease.R
+import com.example.attendease.model.DetailViewModel
 import com.example.attendease.subjectdata.Subject
 import com.example.attendease.ui.theme.nothingFontFamily
 import kotlin.math.ceil
 
 @Composable
-fun SubjectItem(subject: Subject, onPresent: () -> Unit, onAbsent: () -> Unit, onDelete: () -> Unit, onEdit: () -> Unit, onReset:() -> Unit) {
+fun SubjectItem(subject: Subject, onPresent: () -> Unit, onAbsent: () -> Unit, onDelete: () -> Unit, onEdit: () -> Unit, onReset:() -> Unit, onClick:() -> Unit, viewModel: DetailViewModel) {
     val backgroundColor = MaterialTheme.colorScheme.onPrimary
-    val contentColor = MaterialTheme.colorScheme.tertiary
+    val contentColor = MaterialTheme.colorScheme.secondary
     var expanded by remember { mutableStateOf(false) }
     val requiredPercentage = 75
     val adviceText by remember(subject.attend, subject.total) {
@@ -58,9 +61,9 @@ fun SubjectItem(subject: Subject, onPresent: () -> Unit, onAbsent: () -> Unit, o
                 }
 
                 subject.attendancePercentage > requiredPercentage -> {
-                    val skipableClasses = ((subject.attend - 0.75 * subject.total) / 0.75).toInt()
+                    val skippableClasses = ((subject.attend - 0.75 * subject.total) / 0.75).toInt()
                     when {
-                        skipableClasses > 0 -> "You may leave\n $skipableClasses classes "
+                        skippableClasses > 0 -> "You may leave\n $skippableClasses classes "
                         else -> "You can't miss\n your next class"
                     }
                 }
@@ -83,7 +86,9 @@ fun SubjectItem(subject: Subject, onPresent: () -> Unit, onAbsent: () -> Unit, o
         colors = CardColors(backgroundColor,contentColor,backgroundColor.copy(0.5f),contentColor.copy(alpha = 0.5f))
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .clickable(onClick = onClick)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -153,13 +158,28 @@ fun SubjectItem(subject: Subject, onPresent: () -> Unit, onAbsent: () -> Unit, o
                                 expanded = false
                             },
                         )
+                        DropdownMenuItem(
+                            text = { Text(text = "View Details", fontSize = 14.sp) },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Default.Info,
+                                    contentDescription = "Attendance Details",
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            },
+                            onClick = {
+                                onClick()
+                                expanded = false
+                            },
+                        )
                     }
                 }
             }
 
             Column(modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 20.dp)) {
+                .padding(top = 20.dp)
+                ,) {
                 Row {
                     Column {
                         Text(text = "Attended: ${subject.attend}", fontSize = 18.sp) // Left align
@@ -187,9 +207,15 @@ fun SubjectItem(subject: Subject, onPresent: () -> Unit, onAbsent: () -> Unit, o
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(end = 20.dp)
+
                 ) {
                     Spacer(modifier = Modifier.weight(10f))
-                    OutlinedIconButton(onClick = onPresent) {
+                    OutlinedIconButton(
+                        onClick = {
+                            onPresent()
+                            viewModel.insertAttendanceRecord(subject.id, "Present")
+                        }
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Done,
                             contentDescription = "Attended"
@@ -197,7 +223,10 @@ fun SubjectItem(subject: Subject, onPresent: () -> Unit, onAbsent: () -> Unit, o
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     IconButton(
-                        onClick = onAbsent,
+                        onClick = {
+                            onAbsent()
+                            viewModel.insertAttendanceRecord(subject.id, "Absent")
+                        },
                         colors = IconButtonDefaults.iconButtonColors(
                             MaterialTheme.colorScheme.onPrimary.copy(
                                 alpha = 0.8f

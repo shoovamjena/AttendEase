@@ -14,13 +14,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.example.attendease.subjectdata.SubjectDatabase
-import com.example.attendease.subjectdata.SubjectRepository
+import com.example.attendease.attendancedata.AttendanceDatabase
+import com.example.attendease.attendancedata.AttendanceRepository
+import com.example.attendease.model.DetailViewModel
 import com.example.attendease.model.SubjectViewModel
 import com.example.attendease.model.SubjectViewModelFactory
 import com.example.attendease.screen.ChooseColorScreen
 import com.example.attendease.screen.HomeScreen
 import com.example.attendease.screen.WelcomeScreen
+import com.example.attendease.subjectdata.SubjectDatabase
+import com.example.attendease.subjectdata.SubjectRepository
 import com.example.attendease.ui.theme.DarkColorScheme
 import com.example.attendease.ui.theme.LightColorScheme
 import kotlinx.coroutines.flow.first
@@ -35,14 +38,18 @@ class MainActivity : ComponentActivity() {
         val userPreferences = UserPreferences(this)
         // Initialize Room Database
         val database = SubjectDatabase.getDatabase(applicationContext)
+        val database2 = AttendanceDatabase.getAttendanceDatabase(applicationContext)
+
 
         // Initialize Repository
         val repository = SubjectRepository(database.subjectDao())
+        val detailRepository = AttendanceRepository(database2.detailDao())
 
         // Initialize ViewModel using Factory
-        val viewModelFactory = SubjectViewModelFactory(repository, application)
+        val viewModelFactory = SubjectViewModelFactory(repository)
         val subjectViewModel = ViewModelProvider(this, viewModelFactory)[SubjectViewModel::class.java]
 
+        val detailViewModel = DetailViewModel(detailRepository)
 
         lifecycleScope.launch {
             val name = userPreferences.getUserName.first() // Get stored name
@@ -69,7 +76,9 @@ class MainActivity : ComponentActivity() {
                             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && storedColor == null) {
                                 ChooseColorScreen()
                             } else {
-                                HomeScreen(name, storedColor,subjectViewModel)
+                                HomeScreen(
+                                    name, storedColor, subjectViewModel, detailViewModel
+                                )
                             }
                         }
                     }

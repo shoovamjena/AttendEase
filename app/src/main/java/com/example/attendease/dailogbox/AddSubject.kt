@@ -1,4 +1,4 @@
-package com.example.attendease
+package com.example.attendease.dailogbox
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -1,4 +1,4 @@
-package com.example.attendease
+package com.example.attendease.uicomponent
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
