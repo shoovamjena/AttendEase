@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.sp
 import com.example.attendease.R
 import com.example.attendease.UserPreferences
 import com.example.attendease.ui.theme.nothingFontFamily
-import com.example.attendease.uicomponent.welcomeButton
+import com.example.attendease.uicomponent.WelcomeButton
 import kotlinx.coroutines.launch
 
 
@@ -142,7 +142,7 @@ fun WelcomeScreen(
             modifier = modifier.height(80.dp)
         )
 
-        welcomeButton(
+        WelcomeButton(
             text = "GET STARTED!!",
             isNavigationArrowVisible = true,
             onClicked = {

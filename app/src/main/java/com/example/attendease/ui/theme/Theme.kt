@@ -1,53 +1,65 @@
 package com.example.attendease.ui.theme
 
-import android.app.Activity
 import android.os.Build
+import android.util.Log
+
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
- val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
-
- val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
-)
 
 @Composable
 fun AttendEaseTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
+    selectedColor: Int? = null,
     content: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
+    val supportsDynamic = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+
+    val dynamicScheme = try {
+        if (darkTheme) dynamicDarkColorScheme(context)
+        else dynamicLightColorScheme(context)
+    } catch (e: Exception) {
+        null
+    }
+    Log.d("ThemeDebug", "Primary Color: ${dynamicScheme?.primary}")
+
+
+    // Function to detect if dynamic primary color is “ugly” or invisible
+    fun isWeirdColor(color: Color): Boolean {
+        return color.red + color.green + color.blue > 2.5 // too white-ish
+    }
+
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+        dynamicColor && supportsDynamic && dynamicScheme != null && !isWeirdColor(dynamicScheme.primary) -> {
+            dynamicScheme
         }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        selectedColor != null -> {
+            lightColorScheme(
+                primary = Color(selectedColor),
+                secondary = Color(selectedColor),
+                onPrimary = Color.White,
+                onSecondary = Color.White,
+                surface = Color.White,
+                onSurface = Color.Black
+            )
+        }
+
+        else -> {
+            lightColorScheme(
+                primary = Color(0xFF6750A4), // your old purple
+                secondary = Color(0xFF625B71),
+                tertiary = Color(0xFF7D5260),
+                onPrimary = Color.White,
+                surface = Color.White,
+                onSurface = Color.Black
+            )
+        }
     }
 
     MaterialTheme(
@@ -56,3 +68,4 @@ fun AttendEaseTheme(
         content = content
     )
 }
+

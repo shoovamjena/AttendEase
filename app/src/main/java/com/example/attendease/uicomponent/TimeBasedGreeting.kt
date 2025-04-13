@@ -21,7 +21,7 @@ fun TimeBasedGreeting (){
 
     Text(
         text = greetingMessage,
-        color = MaterialTheme.colorScheme.tertiary,
+        color = MaterialTheme.colorScheme.secondary,
         fontSize = 32.sp,
         fontFamily = nothingFontFamily,
         fontWeight = FontWeight.ExtraBold,

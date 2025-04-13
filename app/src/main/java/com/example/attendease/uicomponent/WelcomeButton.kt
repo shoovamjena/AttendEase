@@ -25,7 +25,7 @@ import com.example.attendease.R
 import com.example.attendease.ui.theme.nothingFontFamily
 
 @Composable
-fun welcomeButton(
+fun WelcomeButton(
     modifier: Modifier = Modifier,
     text: String,
     isNavigationArrowVisible: Boolean,

@@ -1,5 +1,6 @@
 package com.example.attendease.dailogbox
 
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +38,7 @@ import com.example.attendease.uicomponent.AttendanceItem
 fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: () -> Unit) {
     // Holds attendance records from ViewModel
     val attendanceRecords by viewModel.attendanceRecords.collectAsState()
+    val isLava = Build.BRAND.equals("lava", ignoreCase = true)
 
     // Load attendance when dialog opens
     LaunchedEffect(subject.id) {
@@ -49,7 +51,7 @@ fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: ()
                 .fillMaxWidth()
                 .padding(16.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.onPrimary)
+                .background(if(isLava){MaterialTheme.colorScheme.onSecondary}else{MaterialTheme.colorScheme.secondaryContainer})
         ) {
             Column(
                 modifier = Modifier
@@ -71,7 +73,7 @@ fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: ()
                 Text(
                     text = "Attendance : ${subject.attend}/${subject.total}",
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraLight,
+                    fontWeight = FontWeight.Light,
                     modifier = Modifier.padding(top = 10.dp)
                 )
                 Text(
@@ -108,7 +110,7 @@ fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: ()
                             .fillMaxWidth()
                             .height(200.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f))// Keeps LazyColumn scrollable
+                            .background(if(isLava){MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)}else{MaterialTheme.colorScheme.onPrimary})// Keeps LazyColumn scrollable
                     ) {
 
                         LazyColumn {
@@ -123,7 +125,7 @@ fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: ()
 
                 Button(
                     onClick = onDismiss,
-                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primaryContainer),
+                    colors = ButtonDefaults.buttonColors(if(isLava){MaterialTheme.colorScheme.primaryContainer}else{MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)}),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
                     Text("Close")

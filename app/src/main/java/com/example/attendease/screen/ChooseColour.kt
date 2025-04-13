@@ -39,7 +39,8 @@ import kotlinx.coroutines.launch
 import kotlin.math.hypot
 
 @Composable
-fun ChooseColorScreen() {
+fun ChooseColorScreen(
+) {
     val colors = remember { Data.colors }
     var previousBackgroundColor by remember { mutableStateOf(colors.first()) }
     var currentBackgroundColor by remember { mutableStateOf(colors.first()) }

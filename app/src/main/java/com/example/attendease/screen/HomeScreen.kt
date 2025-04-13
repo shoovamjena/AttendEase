@@ -1,6 +1,9 @@
+@file:Suppress("NAME_SHADOWING")
+
 package com.example.attendease.screen
 
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,9 +21,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -34,6 +36,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,33 +44,45 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import com.example.attendease.UserPreferences
 import com.example.attendease.dailogbox.AddSubject
 import com.example.attendease.dailogbox.AttendanceDialog
+import com.example.attendease.dailogbox.ChangeTargetDialog
 import com.example.attendease.dailogbox.EditSubject
 import com.example.attendease.model.DetailViewModel
-import com.example.attendease.uicomponent.TimeBasedGreeting
-import com.example.attendease.subjectdata.Subject
 import com.example.attendease.model.SubjectViewModel
+import com.example.attendease.subjectdata.Subject
 import com.example.attendease.ui.theme.coinyFontFamily
 import com.example.attendease.ui.theme.nothingFontFamily
 import com.example.attendease.uicomponent.SubjectItem
+import com.example.attendease.uicomponent.TimeBasedGreeting
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
-    userName: String, selectedColor: Int?,
+    userName: String,
+    selectedColor: Int?,
     viewModel: SubjectViewModel,
     viewModel2: DetailViewModel,
+    navController: NavController
 ) {
+    val context = LocalContext.current
+    val userPreferences = remember { UserPreferences(context) }
+    val coroutineScope = rememberCoroutineScope()
+
+    val isLava = Build.BRAND.equals("lava", ignoreCase = true)
     var addSubjectDialog by rememberSaveable  { mutableStateOf(false) }
+    var showChangeTargetDialog by remember { mutableStateOf(false) }
     var editSubjectDialog by rememberSaveable { mutableStateOf(false) }
     var selectedSubject by remember { mutableStateOf<Subject?>(null) }
     var attendDetail by remember { mutableStateOf<Subject?>(null) }
@@ -77,18 +92,27 @@ fun HomeScreen(
     var attend by remember { mutableStateOf("") }
     val selectColor = selectedColor?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
     val isAndroid12OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    val backgroundColor = if (isAndroid12OrAbove) {
+    var showColorScreen by remember { mutableStateOf(false) }
+    val backgroundColor = if(isLava){
         MaterialTheme.colorScheme.onPrimaryContainer
-    } else {
-        selectColor // Use the selected theme color from ChooseColorScreen
+    }else {
+
+        if (isAndroid12OrAbove) {
+            MaterialTheme.colorScheme.onPrimary
+        } else {
+            selectColor.copy(alpha = 0.2f) // Use the selected theme color from ChooseColorScreen
+        }
     }
-    val contentColor = if (isAndroid12OrAbove) {
-        MaterialTheme.colorScheme.primaryContainer
-    } else {
-        selectColor // Use the selected theme color from ChooseColorScreen
+    val contentColor = if (isLava){
+        MaterialTheme.colorScheme.onPrimary
+    }else {
+        if (isAndroid12OrAbove) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            selectColor.copy(alpha = 0.7f) // Use the selected theme color from ChooseColorScreen
+        }
     }
 
-    val density = LocalDensity.current
     var expanded by remember { mutableStateOf(false) }
 
     fun resetFields() {
@@ -110,13 +134,24 @@ fun HomeScreen(
             onConfirm = {
                 val attended = attend.toIntOrNull()
                 val all = total.toIntOrNull()
-                if(text.isNotEmpty() && attended != null && all != null){
+                if(text.isNotEmpty() && attended != null && all != null && all>=attended){
                     viewModel.addSubject(name = text, attend = attended, total = all)
                     addSubjectDialog = false
                     resetFields()
+                    addSubjectDialog = false
+                }else{
+                    if(text.isEmpty()){
+                        Toast.makeText(context,"Subject can't be empty",Toast.LENGTH_SHORT).show()
+                    }else if(attended ==null){
+                        Toast.makeText(context,"Attended classes can't be empty",Toast.LENGTH_SHORT).show()
+                    }else if(all == null){
+                        Toast.makeText(context,"Total classes can't be empty",Toast.LENGTH_SHORT).show()
+                    }else if(all<attended){
+                        Toast.makeText(context,"Total classes can't be less than classes attended",Toast.LENGTH_SHORT).show()
+                    }
+
                 }
-                addSubjectDialog = false
-                // Handle the confirm action here
+
             }
         )
     }
@@ -154,12 +189,35 @@ fun HomeScreen(
         )
     }
 
+    val currentTarget by userPreferences.targetFlow.collectAsState(initial = 75f)
+    if (showChangeTargetDialog) {
+        ChangeTargetDialog(
+            currentTarget = currentTarget,
+            onDismiss = { showChangeTargetDialog = false },
+            onConfirm = { newTarget ->
+                coroutineScope.launch {
+                    userPreferences.saveTarget(context,newTarget.toFloat())
+                }
+                showChangeTargetDialog = false
+            }
+        )
+    }
 
+    if (showColorScreen) {
+        ChangeColorDialog(
+            onDismiss = { showColorScreen = false },
+            onColourSelected = { selectedColor ->
+                coroutineScope.launch {
+                    userPreferences.saveThemeColor(selectedColor.toArgb())
+                }
+            },
+        )
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onPrimaryContainer)
+            .background(backgroundColor)
     ) {
         Row(
             modifier = Modifier
@@ -178,7 +236,7 @@ fun HomeScreen(
                 ) {
                     Text(
                         text = "Hello",
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 32.sp,
                         fontFamily = nothingFontFamily,
                         fontWeight = FontWeight.ExtraBold,
@@ -196,68 +254,57 @@ fun HomeScreen(
                             fontWeight = FontWeight.ExtraBold,
 
                             )
-                        Box{
+                        Box {
 
-                        IconButton(
-                            onClick = { expanded=true },
-                            colors = IconButtonDefaults.iconButtonColors(contentColor),
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = "Settings",
-                                tint = MaterialTheme.colorScheme.onTertiaryContainer // Icon color
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                            modifier = Modifier
-                                .background(backgroundColor.copy(alpha = 0.5f))
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(text = "Edit Subject", fontSize = 14.sp) },
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.Default.Edit,
-                                        contentDescription = "Edit",
-                                        modifier = Modifier.size(22.dp)
+                            IconButton(
+                                onClick = { expanded = true },
+                                colors = IconButtonDefaults.iconButtonColors(contentColor.copy(alpha = 0.5f)),
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = "Settings",
+                                    tint = MaterialTheme.colorScheme.tertiary// Icon color
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                                modifier = Modifier
+                                    .background(backgroundColor.copy(alpha = 0.5f))
+                            ) {
+                                if(!isAndroid12OrAbove){
+                                    DropdownMenuItem(
+                                        text = { Text(text = "Change Theme", fontSize = 14.sp) },
+                                        leadingIcon = {
+                                            Icon(
+                                                Icons.Default.Edit,
+                                                contentDescription = "Theme",
+                                                modifier = Modifier.size(22.dp)
+                                            )
+                                        },
+                                        onClick = {
+                                            showColorScreen = true
+                                            expanded = false
+                                        },
                                     )
-                                },
-                                onClick = {
+                                }
+                                DropdownMenuItem(
+                                    text = { Text(text = "Change Target", fontSize = 14.sp) },
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Default.Create, // or any icon you like
+                                            contentDescription = "Change Target",
+                                            modifier = Modifier.size(22.dp)
+                                        )
+                                    },
+                                    onClick = {
+                                        showChangeTargetDialog = true
+                                        expanded = false
+                                    },
+                                )
 
-                                    expanded = false
-                                },
-                            )
-                            DropdownMenuItem(
-                                text = { Text(text = "Delete Subject", fontSize = 14.sp) },
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = "Delete",
-                                        modifier = Modifier.size(22.dp)
-                                    )
-                                },
-                                onClick = {
-
-                                    expanded = false
-                                },
-                            )
-                            DropdownMenuItem(
-                                text = { Text(text = "Reset", fontSize = 14.sp) },
-                                leadingIcon = {
-                                    Icon(
-                                        Icons.Default.Refresh,
-                                        contentDescription = "Reset Attendance",
-                                        modifier = Modifier.size(22.dp)
-                                    )
-                                },
-                                onClick = {
-
-                                    expanded = false
-                                },
-                            )
-                        }
+                            }
                         }
                     }
                 }
@@ -278,7 +325,7 @@ fun HomeScreen(
                         .clip(
                             RoundedCornerShape(20.dp)
                         )
-                        .background(MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.5f))
+                        .background(contentColor.copy(alpha = 0.9f))
 
                         .weight(1f)
                 ) {
@@ -299,7 +346,8 @@ fun HomeScreen(
                                     total = subject.total.toString()
                                     editSubjectDialog = true
                                 },
-                                onReset = {viewModel.resetAttendance(subject)},
+                                onReset = {viewModel.resetAttendance(subject)
+                                          viewModel2.resetAttendance(subject)},
                                 onClick = {attendDetail = subject
                                     viewModel2.getAttendanceRecords(subject.id)
                                     attendanceDialog = true
@@ -322,7 +370,7 @@ fun HomeScreen(
                                     drawRect(
                                         Brush.linearGradient(
                                             colors =listOf(
-                                                Color.White,
+                                                backgroundColor,
                                                 Color.Transparent
                                             ),
                                             start = Offset(0f,size.height),
@@ -346,7 +394,7 @@ fun HomeScreen(
                                         Brush.linearGradient(
                                             colors =listOf(
                                                 Color.Transparent,
-                                                Color.White
+                                                backgroundColor
                                             ),
                                             start = Offset(0f,size.height),
                                             end = Offset(0f,0f)
@@ -370,14 +418,20 @@ fun HomeScreen(
                             .padding(20.dp)
                             .size(56.dp)
                             .align(Alignment.BottomEnd)
+                            .shadow(
+                                elevation = 5.dp,
+                                shape = RoundedCornerShape(50.dp),
+                                ambientColor = Color.Black,
+                                spotColor = Color.Black
+                            )
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Add Subject",
                             tint = if (isAndroid12OrAbove) {
-                                MaterialTheme.colorScheme.tertiary
+                                MaterialTheme.colorScheme.secondary
                             } else {
-                                selectColor // Use the selected theme color from ChooseColorScreen
+                                selectColor
                             },
                             modifier = Modifier.size(56.dp)
                         )

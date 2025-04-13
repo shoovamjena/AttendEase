@@ -29,4 +29,5 @@ class SubjectRepository(private val subjectDao: SubjectDao) {
     fun resetAttendance(subject: Subject){
         subjectDao.resetAttendance(subject.id)
     }
+
 }

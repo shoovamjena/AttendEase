@@ -1,5 +1,6 @@
 package com.example.attendease.uicomponent
 
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -22,6 +23,7 @@ import java.util.Locale
 
 @Composable
 fun AttendanceItem(detail: Attendance) {
+    val isLava = Build.BRAND.equals("lava", ignoreCase = true)
     val formattedDate = remember(detail.dateTime) {
         val sdf = SimpleDateFormat("dd-MM-yy | hh.mm a", Locale.getDefault())
         sdf.format(Date(detail.dateTime))
@@ -32,7 +34,7 @@ fun AttendanceItem(detail: Attendance) {
             .fillMaxWidth()
             .padding(8.dp)
             .clip(RoundedCornerShape(5.dp))
-            .background(MaterialTheme.colorScheme.onPrimary),
+            .background(if(isLava){MaterialTheme.colorScheme.onSecondary}else{MaterialTheme.colorScheme.secondaryContainer}),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = formattedDate, fontSize = 14.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(horizontal = 8.dp))

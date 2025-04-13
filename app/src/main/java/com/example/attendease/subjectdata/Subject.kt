@@ -13,5 +13,4 @@ class Subject(
 ){
     val attendancePercentage: Int
         get() = if (total > 0) (attend * 100) / total else 0
-
 }

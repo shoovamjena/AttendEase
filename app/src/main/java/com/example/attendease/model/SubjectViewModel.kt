@@ -16,6 +16,7 @@ class SubjectViewModel(private val repository: SubjectRepository) : ViewModel() 
     private val _subjects = MutableStateFlow<List<Subject>>(emptyList())
     val subjects = _subjects.asStateFlow()
 
+
     init {
         loadSubjects()
     }
@@ -59,6 +60,8 @@ class SubjectViewModel(private val repository: SubjectRepository) : ViewModel() 
             repository.update(subject)
         }
     }
+
+
 }
 
 @Suppress("UNCHECKED_CAST")
