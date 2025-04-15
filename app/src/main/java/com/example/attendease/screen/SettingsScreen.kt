@@ -165,7 +165,7 @@ fun SettingsScreen(
                                 .padding(bottom = 10.dp),
                         ) {
                             Text(
-                                text = "Hello",
+                                text = "Under",
                                 color = MaterialTheme.colorScheme.primary,
                                 fontSize = 28.sp,
                                 fontFamily = nothingFontFamily,
@@ -179,7 +179,7 @@ fun SettingsScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
                                 Text(
-                                    text = "Hello",
+                                    text = "Construction",
                                     color = MaterialTheme.colorScheme.tertiary,
                                     fontSize = 28.sp,
                                     fontFamily = nothingFontFamily,
@@ -192,7 +192,7 @@ fun SettingsScreen(
                         }
                         TimeBasedGreeting()
                         Text(
-                            text = "Let's Keep Your Attendance on Point!",
+                            text = "In Development",
                             color = MaterialTheme.colorScheme.secondary, // Lighter color
                             fontSize = 12.sp,
                             fontFamily = roundFontFamily,

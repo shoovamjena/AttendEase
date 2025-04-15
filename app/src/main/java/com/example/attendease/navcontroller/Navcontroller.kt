@@ -37,7 +37,8 @@ fun AppNavGraph(
                 viewModel = subjectViewModel,
                 viewModel2 = detailViewModel,
                 navController = navController,
-                viewModel3 = mainViewModel
+                viewModel3 = mainViewModel,
+                viewModel4 = timetableViewModel
             )
         }
         composable(Screen.Timetable.route){

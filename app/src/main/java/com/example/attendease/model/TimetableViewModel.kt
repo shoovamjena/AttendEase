@@ -2,6 +2,7 @@ package com.example.attendease.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.attendease.subjectdata.Subject
 import com.example.attendease.timetabledata.Timetable
 import com.example.attendease.timetabledata.TimetableRepository
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +55,7 @@ class TimetableViewModel(private val repository: TimetableRepository) : ViewMode
         viewModelScope.launch(Dispatchers.IO) {
             val item = Timetable(subjectName = name, day = day, startTime = startTime, endTime = endTime)
             repository.addClass(item)
-            if (day == _selectedDay.value) {
+            if (item.day == _selectedDay.value) {
                 loadClasses(day) // only reload if it matches selected
             }
         }
@@ -76,6 +77,20 @@ class TimetableViewModel(private val repository: TimetableRepository) : ViewMode
             if (item.day == _selectedDay.value) {
                 loadClasses(item.day)
             }
+        }
+    }
+
+    fun resetTimetable(){
+        viewModelScope.launch(Dispatchers.IO){
+            repository.resetTimetable()
+            _classesForDate.value = repository.getClassesForDate(_selectedDay.value)
+        }
+    }
+
+    fun deleteClassBasedOnSubject(subject: Subject){
+        viewModelScope.launch(Dispatchers.IO){
+            repository.deleteClassBasedOnSubject(subject)
+            _classesForDate.value = repository.getClassesForDate(_selectedDay.value)
         }
     }
 }

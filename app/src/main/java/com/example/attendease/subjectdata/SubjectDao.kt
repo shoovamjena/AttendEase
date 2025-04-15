@@ -30,4 +30,7 @@ interface SubjectDao {
 
      @Query("UPDATE subject SET attend=0,total = 0 WHERE id = :id")
      fun resetAttendance(id:Int)
+
+     @Query("DELETE FROM subject")
+     fun resetSubjects()
 }

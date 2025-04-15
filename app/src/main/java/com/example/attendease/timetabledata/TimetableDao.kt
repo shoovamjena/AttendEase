@@ -15,4 +15,10 @@ interface TimetableDao {
 
     @Update
     fun updateClass(timetable: Timetable)
+
+    @Query("DELETE FROM timetable")
+    fun resetTimetable()
+
+    @Query("DELETE FROM timetable WHERE subjectName = :subName")
+    fun deleteClassBasedOnSubject(subName: String)
 }

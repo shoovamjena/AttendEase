@@ -60,6 +60,11 @@ class SubjectViewModel(private val repository: SubjectRepository) : ViewModel() 
             repository.update(subject)
         }
     }
+    fun resetSubjects(){
+        viewModelScope.launch(Dispatchers.IO){
+            repository.resetSubject()
+        }
+    }
 
 
 }

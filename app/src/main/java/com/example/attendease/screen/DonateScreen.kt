@@ -176,7 +176,7 @@ fun DonateScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
                                 Text(
-                                    text = "Hello",
+                                    text = "Under Development",
                                     color = MaterialTheme.colorScheme.tertiary,
                                     fontSize = 28.sp,
                                     fontFamily = nothingFontFamily,
@@ -189,7 +189,7 @@ fun DonateScreen(
                         }
                         TimeBasedGreeting()
                         Text(
-                            text = "Let's Keep Your Attendance on Point!",
+                            text = "In Construction",
                             color = MaterialTheme.colorScheme.secondary, // Lighter color
                             fontSize = 12.sp,
                             fontFamily = roundFontFamily,

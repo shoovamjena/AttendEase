@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -69,6 +70,7 @@ import com.example.attendease.dailogbox.EditSubject
 import com.example.attendease.model.DetailViewModel
 import com.example.attendease.model.MainViewModel
 import com.example.attendease.model.SubjectViewModel
+import com.example.attendease.model.TimetableViewModel
 import com.example.attendease.subjectdata.Subject
 import com.example.attendease.ui.theme.nothingFontFamily
 import com.example.attendease.ui.theme.roundFontFamily
@@ -87,7 +89,8 @@ fun HomeScreen(
     viewModel: SubjectViewModel,
     viewModel2: DetailViewModel,
     viewModel3: MainViewModel,
-    navController: NavController
+    navController: NavController,
+    viewModel4: TimetableViewModel
 ) {
     val screen = listOf(
         Screen.Home,
@@ -416,6 +419,25 @@ fun HomeScreen(
                                                     expanded = false
                                                 },
                                             )
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(
+                                                        text = "Reset",
+                                                        fontSize = 14.sp
+                                                    )
+                                                },
+                                                leadingIcon = {
+                                                    Icon(
+                                                        Icons.Default.Refresh, // or any icon you like
+                                                        contentDescription = "Reset",
+                                                        modifier = Modifier.size(22.dp)
+                                                    )
+                                                },
+                                                onClick = {
+                                                    viewModel.resetSubjects()
+                                                    viewModel4.resetTimetable()
+                                                },
+                                            )
 
                                         }
                                     }
@@ -463,7 +485,10 @@ fun HomeScreen(
                                         SubjectItem(
                                             subject, onPresent = { viewModel.markPresent(subject) },
                                             onAbsent = { viewModel.markAbsent(subject) },
-                                            onDelete = { viewModel.deleteSubject(subject) },
+                                            onDelete = {
+                                                viewModel.deleteSubject(subject)
+                                                viewModel4.deleteClassBasedOnSubject(subject)
+                                            },
                                             onEdit = {
                                                 selectedSubject =
                                                     subject // Set the selected subject
