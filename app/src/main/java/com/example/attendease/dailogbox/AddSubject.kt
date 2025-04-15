@@ -38,7 +38,7 @@ fun AddSubject(
     onTotalClassesChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    containerColor: Color = MaterialTheme.colorScheme.onPrimary,
+    containerColor: Color,
 ){
     Dialog(
         onDismissRequest = onDismiss,
@@ -73,7 +73,7 @@ fun AddSubject(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 10.dp),
-                    value = subName,
+                    value = subName.take(20),
                     onValueChange = onSubNameChange,
                     label = {Text(text ="Add Subject") },
                     placeholder = {Text(text="Enter your Subject name", fontSize = 11.sp)},

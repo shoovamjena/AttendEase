@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.room.runtime.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -75,5 +76,4 @@ dependencies {
     implementation(libs.colorpicker.compose)
     implementation (libs.androidx.navigation.compose)
     implementation(libs.lottie.compose)
-
 }

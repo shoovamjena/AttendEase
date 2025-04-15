@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
@@ -23,11 +24,11 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -41,6 +42,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -56,11 +58,20 @@ import com.example.attendease.ui.theme.nothingFontFamily
 import kotlin.math.ceil
 
 @Composable
-fun SubjectItem(subject: Subject, onPresent: () -> Unit, onAbsent: () -> Unit, onDelete: () -> Unit, onEdit: () -> Unit, onReset:() -> Unit, onClick:() -> Unit, viewModel: DetailViewModel) {
+fun SubjectItem(
+    subject: Subject,
+    onPresent: () -> Unit,
+    onAbsent: () -> Unit,
+    onDelete: () -> Unit,
+    onEdit: () -> Unit,
+    onReset: () -> Unit,
+    onClick: () -> Unit,
+    viewModel: DetailViewModel,
+    backgroundColor: Color,
+) {
     val context = LocalContext.current
     val userPreferences = remember { UserPreferences(context) }
-    val isLava = Build.BRAND.equals("lava", ignoreCase = true)
-    val backgroundColor = if(isLava){ MaterialTheme.colorScheme.onSecondary }else{MaterialTheme.colorScheme.onTertiary}
+    Build.BRAND.equals("lava", ignoreCase = true)
     val contentColor = MaterialTheme.colorScheme.secondary
     var expanded by remember { mutableStateOf(false) }
     val currentTarget by userPreferences.targetFlow.collectAsState(initial = 75f)
@@ -96,13 +107,13 @@ fun SubjectItem(subject: Subject, onPresent: () -> Unit, onAbsent: () -> Unit, o
     )
 
 
-    ElevatedCard(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 5.dp),
-        colors = CardColors(backgroundColor,contentColor.copy(alpha = 0.7f),backgroundColor,contentColor.copy(alpha = 0.5f))
+            defaultElevation = 8.dp),
+        colors = CardColors(backgroundColor,contentColor.copy(alpha = 0.7f),backgroundColor,contentColor.copy(alpha = 0.5f)),
     ) {
         Column(
             modifier = Modifier
@@ -113,14 +124,8 @@ fun SubjectItem(subject: Subject, onPresent: () -> Unit, onAbsent: () -> Unit, o
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = subject.name,
-                    fontFamily = nothingFontFamily,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 32.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 10.dp, start = 20.dp) // Ensures the Text is centered horizontally
-                )
+                AdaptiveText(subject.name,32,3,10,modifier = Modifier.padding(top = 10.dp, start = 20.dp),
+                    nothingFontFamily)
                 Box {
                     IconButton(
                         onClick = { expanded = true },
@@ -211,7 +216,8 @@ fun SubjectItem(subject: Subject, onPresent: () -> Unit, onAbsent: () -> Unit, o
                     Column {
                         val animatedPercentage by animateIntAsState(
                             targetValue = subject.attendancePercentage,
-                            animationSpec = tween(durationMillis = 500, easing = FastOutLinearInEasing)
+                            animationSpec = tween(durationMillis = 500, easing = FastOutLinearInEasing),
+                            label = ""
                         )
                         AnimatedAttendanceProgressBar(animatedBarPercentage,requiredPercentage)
                         Text(

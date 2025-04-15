@@ -135,7 +135,7 @@ fun WelcomeScreen(
             leadingIconRes = R.drawable.person,
             placeholderText = "Your Name",
             inputValue = name,
-            onInputChange = { name = it.uppercase() },
+            onInputChange = { name = it.take(20).uppercase() },
             modifier = modifier.padding(horizontal = 24.dp)
         )
         Spacer(

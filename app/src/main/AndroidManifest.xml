@@ -29,7 +29,8 @@
             android:exported="true"
             android:hardwareAccelerated="true"
             android:largeHeap="true"
-            android:theme="@style/Theme.AttendEase" />
+            android:theme="@style/Theme.AttendEase"
+            android:enableOnBackInvokedCallback="true"/>
 
 
     </application>

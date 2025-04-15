@@ -35,7 +35,7 @@ import com.example.attendease.ui.theme.nothingFontFamily
 import com.example.attendease.uicomponent.AttendanceItem
 
 @Composable
-fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: () -> Unit) {
+fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: () -> Unit,backgroundColor: Color,containerColor: Color) {
     // Holds attendance records from ViewModel
     val attendanceRecords by viewModel.attendanceRecords.collectAsState()
     val isLava = Build.BRAND.equals("lava", ignoreCase = true)
@@ -51,7 +51,7 @@ fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: ()
                 .fillMaxWidth()
                 .padding(16.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .background(if(isLava){MaterialTheme.colorScheme.onSecondary}else{MaterialTheme.colorScheme.secondaryContainer})
+                .background(backgroundColor)
         ) {
             Column(
                 modifier = Modifier
@@ -110,7 +110,7 @@ fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: ()
                             .fillMaxWidth()
                             .height(200.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(if(isLava){MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)}else{MaterialTheme.colorScheme.onPrimary})// Keeps LazyColumn scrollable
+                            .background(containerColor.copy(0.7f))// Keeps LazyColumn scrollable
                     ) {
 
                         LazyColumn {
