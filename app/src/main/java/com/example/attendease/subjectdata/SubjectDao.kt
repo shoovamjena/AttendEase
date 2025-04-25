@@ -33,4 +33,7 @@ interface SubjectDao {
 
      @Query("DELETE FROM subject")
      fun resetSubjects()
+
+    @Query("SELECT * FROM subject WHERE id = :subjectId")
+    fun getSubjectById(subjectId: Int): Subject
 }

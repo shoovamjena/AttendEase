@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Timetable::class], version = 1)
+@Database(entities = [Timetable::class], version = 1, exportSchema = false)
 abstract class TimetableDatabase : RoomDatabase() {
     abstract fun timetableDao(): TimetableDao
 

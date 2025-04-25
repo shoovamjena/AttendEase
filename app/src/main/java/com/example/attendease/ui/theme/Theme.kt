@@ -9,6 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
+enum class ThemePreference {
+    LIGHT, DARK, SYSTEM_DEFAULT
+}
 
 @Composable
 fun AttendEaseTheme(

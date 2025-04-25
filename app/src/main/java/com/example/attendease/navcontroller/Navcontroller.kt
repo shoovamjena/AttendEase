@@ -1,9 +1,11 @@
 package com.example.attendease.navcontroller
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.attendease.UserPreferences
 import com.example.attendease.model.DetailViewModel
 import com.example.attendease.model.MainViewModel
 import com.example.attendease.model.SubjectViewModel
@@ -13,7 +15,6 @@ import com.example.attendease.screen.HomeScreen
 import com.example.attendease.screen.SettingsScreen
 import com.example.attendease.screen.TimeTableScreen
 import com.example.attendease.uicomponent.bottomnavbar.Screen
-import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun AppNavGraph(
@@ -25,6 +26,7 @@ fun AppNavGraph(
     selectedColor: Int?,
     mainViewModel: MainViewModel
 ) {
+    val context = LocalContext.current
 
     NavHost(
         navController = navController,
@@ -38,17 +40,18 @@ fun AppNavGraph(
                 viewModel2 = detailViewModel,
                 navController = navController,
                 viewModel3 = mainViewModel,
-                viewModel4 = timetableViewModel
+                viewModel4 = timetableViewModel,
+                userPreference = UserPreferences(context)
             )
         }
         composable(Screen.Timetable.route){
-            TimeTableScreen(selectedColor,navController,timetableViewModel,subjectViewModel)
+            TimeTableScreen(selectedColor,navController,timetableViewModel,subjectViewModel, userPreference = UserPreferences(context))
         }
         composable(Screen.Donate.route) {
             DonateScreen(selectedColor,navController)
         }
         composable(Screen.Settings.route){
-            SettingsScreen(selectedColor,navController)
+            SettingsScreen(selectedColor,navController,subjectViewModel,timetableViewModel)
         }
     }
 }

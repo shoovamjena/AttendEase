@@ -27,14 +27,14 @@ fun FlipIcon(
         animationSpec = spring(
             stiffness = Spring.StiffnessLow,
             dampingRatio = Spring.DampingRatioMediumBouncy
-        )
+        ), label = ""
     )
     Box(
         modifier = modifier
             .graphicsLayer { rotationY = animationRotation },
         contentAlignment = Alignment.Center,
     ) {
-        val icon = if (animationRotation > 90f) activeIcon() else inactiveIcon()
+        val icon = if (animationRotation > 270f) activeIcon() else inactiveIcon()
         Icon(
             painter = rememberVectorPainter(image = icon),
             contentDescription = contentDescription,

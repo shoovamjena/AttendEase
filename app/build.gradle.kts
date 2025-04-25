@@ -69,11 +69,15 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation (libs.androidx.datastore.preferences)
-    implementation(libs.androidx.room.runtime) // Use latest version
-    kapt(libs.androidx.room.compiler)
-    implementation(libs.androidx.room.ktx) // Coroutine support
+    implementation(libs.androidx.room.runtime)
+    kapt (libs.androidx.room.compiler.v250)
+    implementation(libs.androidx.room.ktx)
     implementation(libs.atomicfu)
     implementation(libs.colorpicker.compose)
     implementation (libs.androidx.navigation.compose)
     implementation(libs.lottie.compose)
+    implementation (libs.lottie.compose.v610 )
+    implementation (libs.androidx.work.runtime.ktx)
+    implementation (libs.androidx.core.ktx.v1120)
+
 }

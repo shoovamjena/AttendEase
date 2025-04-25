@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -51,11 +53,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.attendease.UserPreferences
 import com.example.attendease.dailogbox.AddClass
 import com.example.attendease.dailogbox.EditClass
 import com.example.attendease.model.SubjectViewModel
 import com.example.attendease.model.TimetableViewModel
+import com.example.attendease.notification.AlarmScheduler
 import com.example.attendease.timetabledata.Timetable
+import com.example.attendease.ui.theme.ThemePreference
 import com.example.attendease.ui.theme.nothingFontFamily
 import com.example.attendease.ui.theme.roundFontFamily
 import com.example.attendease.uicomponent.TimeTableItem
@@ -75,9 +80,15 @@ fun TimeTableScreen(
     selectedColor: Int?,
     navController: NavController = rememberNavController(),
     timeViewModel: TimetableViewModel,
-    subjectViewModel: SubjectViewModel
+    subjectViewModel: SubjectViewModel,
+    userPreference: UserPreferences
 ) {
-    val currentDay = LocalDate.now().dayOfWeek.getDisplayName(TextStyle.FULL, Locale.ENGLISH).uppercase()
+    val themePref by userPreference.themePreferenceFlow.collectAsState(initial = ThemePreference.LIGHT)
+    val isDark = when (themePref) {
+        ThemePreference.DARK -> true
+        ThemePreference.LIGHT -> false
+        ThemePreference.SYSTEM_DEFAULT -> isSystemInDarkTheme()
+    }
     val context = LocalContext.current
     var addClassDialog by remember{ mutableStateOf(false) }
     var editClassDialog by remember { mutableStateOf(false) }
@@ -93,10 +104,10 @@ fun TimeTableScreen(
     val isAndroid12OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
     val backgroundColor = if(isLava){
-        MaterialTheme.colorScheme.onPrimaryContainer
+        if(isDark)
+            MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
     }else {
-
-        MaterialTheme.colorScheme.onPrimary
+        if(isDark)MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onPrimary
     }
     val contentColor = if (isLava){
         MaterialTheme.colorScheme.onPrimary
@@ -107,29 +118,34 @@ fun TimeTableScreen(
             selectColor
         }
     }
-
-
+    var selectedDay by remember { mutableStateOf("") }
     var isReady by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
+        selectedDay = LocalDate.now().dayOfWeek.getDisplayName(TextStyle.FULL, Locale.ENGLISH).uppercase()
+        timeViewModel.loadClasses(selectedDay)
         delay(100)
         isReady = true
     }
     var selectedClass by remember { mutableStateOf<Timetable?>(null) }
-
     var subName by remember { mutableStateOf("") }
-    var selectedDay by remember { mutableStateOf(currentDay) }
-    var startTime by remember { mutableStateOf("") }
-    var endTime by remember { mutableStateOf("") }
+    var startTime by remember { mutableStateOf("12:00 AM") }
+    var endTime by remember { mutableStateOf("12:00 AM") }
     fun resetFields(){
         subName =""
-        selectedDay = currentDay
-        startTime = ""
-        endTime = ""
+        selectedDay = LocalDate.now().dayOfWeek.getDisplayName(TextStyle.FULL, Locale.ENGLISH).uppercase()
+        startTime = "12:00 AM"
+        endTime = "12:00 AM"
     }
     fun parseTimeTo24Hour(time: String): LocalTime {
         val formatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.ENGLISH)
         return LocalTime.parse(time, formatter)
     }
+
+    val alarmScheduler = remember {
+        AlarmScheduler(context)
+    }
+
+
     if (addClassDialog) {
         AddClass(
             subName = subName,
@@ -146,14 +162,16 @@ fun TimeTableScreen(
                 val end = parseTimeTo24Hour(endTime)
                 val firstTime = startTime
                 val lastTime = endTime
-                if(subName.isNotEmpty() && selectedDay.isNotEmpty() && startTime.isNotEmpty() && endTime.isNotEmpty() && start.isBefore(end)){
+                if(subName.isNotEmpty() && start.isBefore(end)){
                     timeViewModel.addClass(subName,selectedDay, firstTime, lastTime)
-                    resetFields()
                     addClassDialog=false
+                    alarmScheduler.scheduleAllAlarms()
+                    resetFields()
                 }else{
                     Toast.makeText(context,"Enter proper details", Toast.LENGTH_SHORT).show()
                     addClassDialog=true
                 }
+
             },
             containerColor = contentColor,
             viewModel = subjectViewModel
@@ -177,7 +195,7 @@ fun TimeTableScreen(
                 val end = parseTimeTo24Hour(endTime)
                 val firstTime = startTime
                 val lastTime = endTime
-                if(subName.isNotEmpty() && selectedDay.isNotEmpty() && start.isBefore(end)){
+                if(subName.isNotEmpty() && start.isBefore(end)){
                     selectedClass?.let { timetable ->
                         timeViewModel.updateClass(
                             id = timetable.Id,
@@ -186,6 +204,7 @@ fun TimeTableScreen(
                             startTime = firstTime,
                             endTime = lastTime
                         )
+                        alarmScheduler.scheduleAllAlarms()
                         resetFields()
                         editClassDialog=false
                     }
@@ -194,6 +213,7 @@ fun TimeTableScreen(
                 }
                 resetFields()
                 editClassDialog=false
+
             },
             containerColor = contentColor,
             viewModel = subjectViewModel
@@ -202,7 +222,7 @@ fun TimeTableScreen(
 
 
     if (!isReady) {
-        Box(modifier = Modifier.fillMaxSize().background(contentColor), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxSize().background(Color.Transparent), contentAlignment = Alignment.Center) {
             Text(text = "LOADING...", fontSize = 42.sp, fontFamily = nothingFontFamily, fontWeight = FontWeight.Bold, color = contentColor)        }
     } else {
         Scaffold(
@@ -226,7 +246,10 @@ fun TimeTableScreen(
                         BottomNavNoAnimation(
                             screens = screen,
                             contentColor,
-                            backgroundColor.copy(alpha = 0.5f),
+                            if(isLava && isDark) MaterialTheme.colorScheme.onPrimaryContainer.copy(0.5f)
+                            else{
+                                if(isDark) MaterialTheme.colorScheme.onPrimary.copy(0.5f)
+                                else backgroundColor.copy(alpha = 0.5f)},
                             navController,
                             1
                         )
@@ -234,12 +257,6 @@ fun TimeTableScreen(
                 }
             }
         ) { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(backgroundColor)
-            ) {
-                // Header part
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -284,7 +301,7 @@ fun TimeTableScreen(
 
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .fillMaxSize()
                                 .heightIn(min = 500.dp)
                                 .padding(top = 25.dp, bottom = 30.dp, start = 10.dp, end = 10.dp)
                                 .clip(RoundedCornerShape(20.dp))
@@ -299,7 +316,7 @@ fun TimeTableScreen(
                                     color = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.align(Alignment.Center)
                                 )
-                            }
+                            }else {
                                 LazyColumn(
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -308,19 +325,24 @@ fun TimeTableScreen(
                                     items(timeTableList) { item ->
                                         TimeTableItem(
                                             timetable = item,
-                                            onDelete = { timeViewModel.deleteClass(item) },  // Replace with actual delete logic
+                                            onDelete = { timeViewModel.deleteClass(item)
+                                                alarmScheduler.scheduleAllAlarms()
+                                            },
                                             onEdit = {
                                                 selectedClass = item
                                                 subName = item.subjectName
                                                 selectedDay = item.day
                                                 startTime = item.startTime
                                                 endTime = item.endTime
-                                                editClassDialog = true },
+                                                editClassDialog = true
+                                            },
                                             onClick = { /* TODO: Navigate to detail screen or show bottom sheet */ },
-                                            backgroundColor = backgroundColor.copy(0.7f),
+                                            backgroundColor = if(isDark && !isLava)MaterialTheme.colorScheme.tertiaryContainer else backgroundColor,
+                                            contentColor
                                         )
                                     }
                                 }
+                            }
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -403,7 +425,6 @@ fun TimeTableScreen(
                         }
                     }
                 }
-            }
         }
     }
 }

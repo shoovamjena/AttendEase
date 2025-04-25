@@ -79,7 +79,7 @@ fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: ()
                 Text(
                     text = "Attended : ${subject.attendancePercentage} %",
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraLight,
+                    fontWeight = FontWeight.Light,
                     modifier = Modifier.padding(top = 10.dp)
                 )
                 }
@@ -88,7 +88,7 @@ fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: ()
                     Text(
                         text = "No attendance records found",
                         fontSize = 14.sp,
-                        color = Color.Gray,
+                        color = Color.Black,
                         modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 10.dp),
                         fontFamily = nothingFontFamily
                     )

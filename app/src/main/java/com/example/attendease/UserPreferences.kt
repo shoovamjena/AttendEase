@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.attendease.ui.theme.ThemePreference
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -18,7 +19,9 @@ class UserPreferences(private val context: Context) {
         private val USER_NAME_KEY = stringPreferencesKey("user_name")
         private val THEME_COLOR_KEY = intPreferencesKey("theme_color")
         private val TARGET_KEY = floatPreferencesKey("target")
+        private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
     }
+
 
     suspend fun saveUserName(name: String) {
         context.dataStore.edit { preferences ->
@@ -51,7 +54,17 @@ class UserPreferences(private val context: Context) {
     val targetFlow: Flow<Float> = context.dataStore.data
         .map { preferences ->
             preferences[TARGET_KEY] ?: 75f
+    }
+
+    suspend fun saveThemePreference(mode: ThemePreference) {
+        context.dataStore.edit { preferences ->
+            preferences[THEME_MODE_KEY] = mode.name
         }
+    }
 
-
+    val themePreferenceFlow: Flow<ThemePreference> = context.dataStore.data
+        .map { preferences ->
+            val mode = preferences[THEME_MODE_KEY]
+            ThemePreference.values().firstOrNull { it.name == mode } ?: ThemePreference.SYSTEM_DEFAULT
+        }
 }

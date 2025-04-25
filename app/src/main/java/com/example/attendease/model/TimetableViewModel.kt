@@ -1,5 +1,6 @@
 package com.example.attendease.model
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.attendease.subjectdata.Subject
@@ -31,7 +32,7 @@ class TimetableViewModel(private val repository: TimetableRepository) : ViewMode
         return dayMap[shortDay] ?: shortDay // Default to shortDay if no match found
     }
 
-    private val _selectedDay = MutableStateFlow(currentDay)
+    private var _selectedDay = mutableStateOf(currentDay)
 
     private val _classesForDate = MutableStateFlow<List<Timetable>>(emptyList())
     val classesForDate: StateFlow<List<Timetable>> = _classesForDate

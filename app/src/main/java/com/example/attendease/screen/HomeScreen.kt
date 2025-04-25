@@ -5,6 +5,7 @@ package com.example.attendease.screen
 import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,17 +62,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.text.isDigitsOnly
 import androidx.navigation.NavController
 import com.example.attendease.UserPreferences
 import com.example.attendease.dailogbox.AddSubject
 import com.example.attendease.dailogbox.AttendanceDialog
 import com.example.attendease.dailogbox.ChangeTargetDialog
+import com.example.attendease.dailogbox.DeleteDialog
 import com.example.attendease.dailogbox.EditSubject
 import com.example.attendease.model.DetailViewModel
 import com.example.attendease.model.MainViewModel
 import com.example.attendease.model.SubjectViewModel
 import com.example.attendease.model.TimetableViewModel
 import com.example.attendease.subjectdata.Subject
+import com.example.attendease.ui.theme.ThemePreference
 import com.example.attendease.ui.theme.nothingFontFamily
 import com.example.attendease.ui.theme.roundFontFamily
 import com.example.attendease.uicomponent.SplashTransition
@@ -90,20 +94,29 @@ fun HomeScreen(
     viewModel2: DetailViewModel,
     viewModel3: MainViewModel,
     navController: NavController,
-    viewModel4: TimetableViewModel
+    viewModel4: TimetableViewModel,
+    userPreference: UserPreferences
 ) {
+    val subjects by viewModel.subjects.collectAsState()
+
     val screen = listOf(
         Screen.Home,
         Screen.Timetable,
         Screen.Donate,
         Screen.Settings
     )
-
+    val themePref by userPreference.themePreferenceFlow.collectAsState(initial = ThemePreference.LIGHT)
+    val isDark = when (themePref) {
+        ThemePreference.DARK -> true
+        ThemePreference.LIGHT -> false
+        ThemePreference.SYSTEM_DEFAULT -> isSystemInDarkTheme()
+    }
     val context = LocalContext.current
     val userPreferences = remember { UserPreferences(context) }
     val coroutineScope = rememberCoroutineScope()
 
     val isLava = Build.BRAND.equals("lava", ignoreCase = true)
+    var deleteDialog by remember { mutableStateOf(false) }
     var addSubjectDialog by rememberSaveable  { mutableStateOf(false) }
     var showChangeTargetDialog by remember { mutableStateOf(false) }
     var editSubjectDialog by rememberSaveable { mutableStateOf(false) }
@@ -117,10 +130,10 @@ fun HomeScreen(
     val isAndroid12OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     var showColorScreen by remember { mutableStateOf(false) }
     val backgroundColor = if(isLava){
-        MaterialTheme.colorScheme.onPrimaryContainer
+        if(isDark)
+        MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
     }else {
-
-            MaterialTheme.colorScheme.onPrimary
+        if(isDark)MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onPrimary
     }
     val contentColor = if (isLava){
         MaterialTheme.colorScheme.onPrimary
@@ -153,21 +166,27 @@ fun HomeScreen(
             onConfirm = {
                 val attended = attend.toIntOrNull()
                 val all = total.toIntOrNull()
-                if(text.isNotEmpty() && attended != null && all != null && all>=attended){
-                    viewModel.addSubject(name = text, attend = attended, total = all)
-                    addSubjectDialog = false
-                    resetFields()
-                }else{
-                    if(text.isEmpty()){
-                        Toast.makeText(context,"Subject can't be empty",Toast.LENGTH_SHORT).show()
-                    }else if(attended ==null){
-                        Toast.makeText(context,"Attended classes can't be empty",Toast.LENGTH_SHORT).show()
-                    }else if(all == null){
-                        Toast.makeText(context,"Total classes can't be empty",Toast.LENGTH_SHORT).show()
-                    }else if(all<attended){
-                        Toast.makeText(context,"Total classes can't be less than classes attended",Toast.LENGTH_SHORT).show()
+                when {
+                    text.isEmpty() -> {
+                        Toast.makeText(context, "Subject can't be empty", Toast.LENGTH_SHORT).show()
                     }
-
+                    attended == null -> {
+                        Toast.makeText(context, "Attended classes can't be empty", Toast.LENGTH_SHORT).show()
+                    }
+                    all == null -> {
+                        Toast.makeText(context, "Total classes can't be empty", Toast.LENGTH_SHORT).show()
+                    }
+                    attended < 0 || all < 0 -> {
+                        Toast.makeText(context, "Classes can't be negative", Toast.LENGTH_SHORT).show()
+                    }
+                    all < attended -> {
+                        Toast.makeText(context, "Total classes can't be less than classes attended", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {
+                        viewModel.addSubject(name = text, attend = attended, total = all)
+                        addSubjectDialog = false
+                        resetFields()
+                    }
                 }
 
             },
@@ -190,19 +209,37 @@ fun HomeScreen(
             onConfirm = {
                 val attended = attend.toIntOrNull()
                 val all = total.toIntOrNull()
-                if (text.isNotEmpty() && attended != null && all != null) {
-                    selectedSubject?.let { subject -> // Null safety check
-                        viewModel.updateSubject(
-                            id = subject.id,
-                            newName = text,
-                            newAttend = attended,
-                            newTotal = all
-                        )
-                        viewModel2.resetAttendance(subject)
-                        editSubjectDialog = false
-                        resetFields()
+                when {
+                    text.isEmpty() -> {
+                        Toast.makeText(context, "Subject can't be empty", Toast.LENGTH_SHORT).show()
+                    }
+                    attended == null -> {
+                        Toast.makeText(context, "Attended classes can't be empty", Toast.LENGTH_SHORT).show()
+                    }
+                    all == null -> {
+                        Toast.makeText(context, "Total classes can't be empty", Toast.LENGTH_SHORT).show()
+                    }
+                    attended < 0 || all < 0 -> {
+                        Toast.makeText(context, "Classes can't be negative", Toast.LENGTH_SHORT).show()
+                    }
+                    all < attended -> {
+                        Toast.makeText(context, "Total classes can't be less than classes attended", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {
+                        selectedSubject?.let { subject -> // Null safety check
+                            viewModel.updateSubject(
+                                id = subject.id,
+                                newName = text,
+                                newAttend = attended,
+                                newTotal = all
+                            )
+                            viewModel2.resetAttendance(subject)
+                            editSubjectDialog = false
+                            resetFields()
+                        }
                     }
                 }
+
             },
             contentColor
 
@@ -233,19 +270,25 @@ fun HomeScreen(
             },
         )
     }
-
-    if (!viewModel3.hasSplashPlayed) {
-        SplashTransition(
-            onAnimationEnd = {
-                viewModel3.hasSplashPlayed = true
-            },backgroundColor,contentColor
+    if (deleteDialog){
+        DeleteDialog(
+            onConfirm = {
+                viewModel.resetSubjects()
+                viewModel4.resetTimetable()
+            },
+            onDismiss = {
+                deleteDialog = false
+                expanded = false},
+            containerColor = contentColor,
+            text = "RESET",
+            toast = "ALL RECORDS DELETED!!"
         )
     }
     if (!viewModel3.hasSplashPlayed) {
         SplashTransition(
             onAnimationEnd = {
                 viewModel3.hasSplashPlayed = true
-            }, backgroundColor,contentColor
+            }, backgroundColor,if(isDark)MaterialTheme.colorScheme.primary else contentColor
         )
     } else {
         var isReady by remember { mutableStateOf(false) }
@@ -254,7 +297,9 @@ fun HomeScreen(
             isReady = true
         }
         if (!isReady) {
-            Box(modifier = Modifier.fillMaxSize().background(contentColor), contentAlignment = Alignment.Center) {}
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .background(if(isDark)MaterialTheme.colorScheme.primary else contentColor), contentAlignment = Alignment.Center) {}
         }
         else {
             Scaffold(
@@ -278,7 +323,10 @@ fun HomeScreen(
                             BottomNavNoAnimation(
                                 screens = screen,
                                 contentColor,
-                                backgroundColor.copy(alpha = 0.7f),
+                                if(isLava && isDark) MaterialTheme.colorScheme.onPrimaryContainer.copy(0.5f)
+                                else{
+                                    if(isDark) MaterialTheme.colorScheme.onPrimary.copy(0.5f)
+                                    else backgroundColor.copy(alpha = 0.5f)},
                                 navController,
                                 0
                             )
@@ -287,12 +335,6 @@ fun HomeScreen(
                 }
             ) { paddingValues ->
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(backgroundColor),
-
-                    ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -428,14 +470,18 @@ fun HomeScreen(
                                                 },
                                                 leadingIcon = {
                                                     Icon(
-                                                        Icons.Default.Refresh, // or any icon you like
+                                                        Icons.Default.Refresh,
                                                         contentDescription = "Reset",
                                                         modifier = Modifier.size(22.dp)
                                                     )
                                                 },
                                                 onClick = {
-                                                    viewModel.resetSubjects()
-                                                    viewModel4.resetTimetable()
+                                                    if (subjects.isNotEmpty()){
+                                                    deleteDialog = true}
+                                                    else{
+                                                        Toast.makeText(context,"No records to delete !!", Toast.LENGTH_LONG).show()
+                                                        expanded = false
+                                                    }
                                                 },
                                             )
 
@@ -464,7 +510,6 @@ fun HomeScreen(
 
                                     .weight(1f)
                             ) {
-                                val subjects by viewModel.subjects.collectAsState()
                                 val listState = rememberLazyListState()
 
                                 if (subjects.isEmpty()) {
@@ -507,7 +552,8 @@ fun HomeScreen(
                                                 attendanceDialog = true
                                             },
                                             viewModel2,
-                                            backgroundColor
+                                            if(isDark && !isLava)MaterialTheme.colorScheme.tertiaryContainer else backgroundColor,
+                                            contentColor
                                         )
                                     }
                                 }
@@ -576,7 +622,7 @@ fun HomeScreen(
                                         }
                                     ),
                                     modifier = Modifier
-                                        .padding(20.dp)
+                                        .padding(10.dp)
                                         .size(46.dp)
                                         .align(Alignment.BottomEnd)
                                         .shadow(
@@ -601,7 +647,6 @@ fun HomeScreen(
                             }
                         }
                     }
-                }
             }
         }
     }

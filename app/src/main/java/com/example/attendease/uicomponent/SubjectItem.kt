@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.attendease.R
 import com.example.attendease.UserPreferences
+import com.example.attendease.dailogbox.DeleteDialog
 import com.example.attendease.model.DetailViewModel
 import com.example.attendease.subjectdata.Subject
 import com.example.attendease.ui.theme.nothingFontFamily
@@ -68,12 +69,14 @@ fun SubjectItem(
     onClick: () -> Unit,
     viewModel: DetailViewModel,
     backgroundColor: Color,
+    dialogColor: Color
 ) {
     val context = LocalContext.current
     val userPreferences = remember { UserPreferences(context) }
     Build.BRAND.equals("lava", ignoreCase = true)
     val contentColor = MaterialTheme.colorScheme.secondary
     var expanded by remember { mutableStateOf(false) }
+    var deleteDialog by remember { mutableStateOf(false) }
     val currentTarget by userPreferences.targetFlow.collectAsState(initial = 75f)
     val requiredPercentage = currentTarget
     val targetDecimal = requiredPercentage/100f
@@ -105,6 +108,19 @@ fun SubjectItem(
         animationSpec = tween(durationMillis = 1000),
         label = "AttendanceAnimation"
     )
+    if (deleteDialog){
+        DeleteDialog(
+            onConfirm = {
+                onDelete()
+            },
+            onDismiss = {
+                deleteDialog = false
+                expanded = false},
+            containerColor = dialogColor,
+            text = "DELETE",
+            toast = "${subject.name} IS DELETED!!"
+        )
+    }
 
 
     Card(
@@ -113,7 +129,7 @@ fun SubjectItem(
             .padding(8.dp),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 8.dp),
-        colors = CardColors(backgroundColor,contentColor.copy(alpha = 0.7f),backgroundColor,contentColor.copy(alpha = 0.5f)),
+        colors = CardColors(backgroundColor,contentColor,backgroundColor,contentColor),
     ) {
         Column(
             modifier = Modifier
@@ -164,8 +180,7 @@ fun SubjectItem(
                                 )
                             },
                             onClick = {
-                                onDelete()
-                                expanded = false
+                                deleteDialog = true
                             },
                         )
                         DropdownMenuItem(

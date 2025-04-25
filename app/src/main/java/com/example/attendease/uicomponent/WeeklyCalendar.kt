@@ -2,6 +2,9 @@ package com.example.attendease.uicomponent
 
 import android.os.Build
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -102,7 +105,7 @@ fun Weekly(
                         MaterialTheme.colorScheme.onPrimary.copy(0.1f)
                     }else{MaterialTheme.colorScheme.primaryContainer.copy(0.1f)}
                 },
-                animationSpec = tween(durationMillis = 600),
+                animationSpec = tween(durationMillis = 700, easing  = FastOutSlowInEasing),
                 label = "bgColorAnim"
             )
 

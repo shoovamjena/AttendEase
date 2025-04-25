@@ -1,20 +1,36 @@
 package com.example.attendease.screen
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,19 +42,39 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.draw.alpha
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.attendease.R
+import com.example.attendease.UserPreferences
+import com.example.attendease.dailogbox.DeleteDialog
+import com.example.attendease.model.SubjectViewModel
+import com.example.attendease.model.TimetableViewModel
 import com.example.attendease.ui.theme.nothingFontFamily
 import com.example.attendease.ui.theme.roundFontFamily
-import com.example.attendease.uicomponent.TimeBasedGreeting
+import com.example.attendease.uicomponent.NotificationToggle
+import com.example.attendease.uicomponent.ThemeSwitch
+import com.example.attendease.uicomponent.TypeWriterWithCursor
 import com.example.attendease.uicomponent.bottomnavbar.BottomNavNoAnimation
 import com.example.attendease.uicomponent.bottomnavbar.Screen
 import kotlinx.coroutines.delay
@@ -46,7 +82,9 @@ import kotlinx.coroutines.delay
 @Composable
 fun SettingsScreen(
     selectedColor: Int?,
-    navController: NavController = rememberNavController()
+    navController: NavController = rememberNavController(),
+    viewModel: SubjectViewModel,
+    viewModel4: TimetableViewModel
 ) {
     val screen = listOf(
         Screen.Home,
@@ -55,14 +93,17 @@ fun SettingsScreen(
         Screen.Settings
     )
 
+    val context = LocalContext.current
+    val activity = context as Activity
     val selectColor = selectedColor?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
     val isLava = Build.BRAND.equals("lava", ignoreCase = true)
     val isAndroid12OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
+    var deleteDialog by remember { mutableStateOf(false) }
+
     val backgroundColor = if(isLava){
         MaterialTheme.colorScheme.onPrimaryContainer
     }else {
-
         MaterialTheme.colorScheme.onPrimary
     }
     val contentColor = if (isLava){
@@ -75,6 +116,16 @@ fun SettingsScreen(
         }
     }
 
+    var isNotificationOn by remember {
+        mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled())
+    }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        // Update toggle state based on result
+        isNotificationOn = NotificationManagerCompat.from(context).areNotificationsEnabled()
+    }
+
 
     var isReady by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -82,20 +133,60 @@ fun SettingsScreen(
         isReady = true
     }
 
+    val composition1 by rememberLottieComposition(
+        spec = LottieCompositionSpec.RawRes(R.raw.heart)
+    )
+
+    val progress1 by animateLottieCompositionAsState(
+        composition = composition1,
+        iterations = LottieConstants.IterateForever,
+        isPlaying = true,
+        restartOnPlay = false
+    )
+
+    val composition2 by rememberLottieComposition(
+        spec = LottieCompositionSpec.RawRes(R.raw.hearts)
+    )
+    val progress2 by animateLottieCompositionAsState(
+        composition = composition2,
+        iterations = LottieConstants.IterateForever,
+        isPlaying = true,
+        restartOnPlay = false
+    )
+    if (deleteDialog){
+        DeleteDialog(
+            onConfirm = {
+                viewModel.resetSubjects()
+                viewModel4.resetTimetable()
+            },
+            onDismiss = {
+                deleteDialog = false },
+            containerColor = contentColor,
+            text = "RESET",
+            toast = "ALL RECORDS DELETED!!"
+        )
+    }
+
     if (!isReady) {
-        Box(modifier = Modifier.fillMaxSize().background(contentColor), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxSize().background(Color.Transparent), contentAlignment = Alignment.Center) {
             Text(text = "LOADING...", fontSize = 42.sp, fontFamily = nothingFontFamily, fontWeight = FontWeight.Bold, color = contentColor)        }
     } else {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {
-                Box(
+                Column (
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 10.dp)
                         .heightIn(min = 30.dp)
-                        .windowInsetsPadding(WindowInsets.navigationBars)
+                        .windowInsetsPadding(WindowInsets.navigationBars),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+//                    LottieAnimation(
+//                        composition = composition2,
+//                        progress = { progress2 },
+//                        modifier = Modifier.size(500.dp).alpha(0.5f)
+//                    )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -112,23 +203,17 @@ fun SettingsScreen(
                             3
                         )
                     }
+
                 }
             }
         ) { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(backgroundColor),
 
-                ) {
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 30.dp)
                         .windowInsetsPadding(WindowInsets.statusBars)
                         .clip(RoundedCornerShape(50))
-
-
                 ) {
                     Row(
                         modifier = Modifier
@@ -148,77 +233,288 @@ fun SettingsScreen(
 
                     }
                 }
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 80.dp, start = 10.dp, end = 10.dp)
+                        .padding(top = 130.dp, start = 10.dp, end = 10.dp)
                 ) {
-
-                    Column(
+                    Box(
                         modifier = Modifier
-                            .padding(top = 10.dp, bottom = 80.dp)
-                            .fillMaxSize()
+                            .fillMaxWidth()
+                            .requiredHeightIn(50.dp,60.dp)
+                            .shadow(15.dp, shape = RoundedCornerShape(50))
+                            .clip(RoundedCornerShape(50))
+                            .background(contentColor)
+                    ){
+                        Row (
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ){
+                            Text(
+                                text = "NOTIFICATIONS",
+                                fontFamily = nothingFontFamily,
+                                color = if(isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                                fontSize = 18.sp
+                            )
+                            Spacer(modifier = Modifier.weight(weight = 1f))
+                            if(isAndroid12OrAbove) {
+                                NotificationToggle(
+                                    contentColor,
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.primary.copy(0.5f),
+                                    backgroundColor.copy(0.8f),
+                                    isSwitchOn = isNotificationOn,
+                                    onToggleChange = {
+                                        if (isNotificationOn) {
+                                            // Open settings to turn OFF
+                                            val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                            }
+                                            context.startActivity(intent)
+                                            isNotificationOn = !isNotificationOn
+                                        } else {
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                                if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.POST_NOTIFICATIONS)) {
+                                                    // Show system permission dialog again
+                                                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+
+                                                }
+                                            }else {
+                                                // Already denied once, redirect to settings
+                                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                                    data = Uri.fromParts("package", context.packageName, null)
+                                                }
+                                                context.startActivity(intent)
+                                                isNotificationOn = !isNotificationOn
+                                            }
+                                        }
+                                    }
+                                )
+                            }else{
+                                NotificationToggle(
+                                    contentColor,
+                                    MaterialTheme.colorScheme.tertiary,
+                                    MaterialTheme.colorScheme.tertiary.copy(0.5f),
+                                    backgroundColor.copy(0.8f),
+                                    isSwitchOn = isNotificationOn,
+                                    onToggleChange = {
+                                        if (isNotificationOn) {
+                                            // Open settings to turn OFF
+                                            val intent = Intent().apply {
+                                                action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                                                putExtra(
+                                                    Settings.EXTRA_APP_PACKAGE,
+                                                    context.packageName
+                                                )
+                                            }
+                                            context.startActivity(intent)
+                                        } else {
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                                ActivityCompat.requestPermissions(
+                                                    context as Activity,
+                                                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                                                    101
+                                                )
+                                            }
+                                        }
+
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .requiredHeightIn(50.dp,60.dp)
+                            .shadow(15.dp, shape = RoundedCornerShape(50))
+                            .clip(RoundedCornerShape(50))
+                            .background(contentColor)
+                    ){
+                        Row (
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ){
+                            Text(
+                                text = "CHANGE THEME",
+                                fontFamily = nothingFontFamily,
+                                color =  if(isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                                fontSize = 18.sp
+                            )
+                            if(isAndroid12OrAbove) {
+                                ThemeSwitch(
+                                    contentColor,
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.primary.copy(0.5f),
+                                    backgroundColor.copy(0.8f),
+                                    userPreferences = UserPreferences(context)
+                                )
+                            }else{
+                                ThemeSwitch(
+                                    contentColor,
+                                    MaterialTheme.colorScheme.tertiary,
+                                    MaterialTheme.colorScheme.tertiary.copy(0.5f),
+                                    backgroundColor.copy(0.8f),
+                                    userPreferences = UserPreferences(context)
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .requiredHeightIn(50.dp,60.dp)
+                            .shadow(15.dp, shape = RoundedCornerShape(50))
+                            .clip(RoundedCornerShape(50))
+                            .background(contentColor)
+                            .clickable {
+                                Bug(context)
+                            }
                     ) {
                         Row(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 10.dp),
+                                .fillMaxSize()
+                                .padding(horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Under",
-                                color = MaterialTheme.colorScheme.primary,
-                                fontSize = 28.sp,
+                                text = "REPORT BUG",
                                 fontFamily = nothingFontFamily,
-                                fontWeight = FontWeight.ExtraBold,
-                                modifier = Modifier.alpha(0.6f)
+                                color = if (isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                                fontSize = 18.sp
                             )
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 10.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
+                            IconButton(
+                                onClick = {
+                                    Bug(context)
+                                },
+                                modifier = Modifier.size(42.dp),
                             ) {
-                                Text(
-                                    text = "Construction",
-                                    color = MaterialTheme.colorScheme.tertiary,
-                                    fontSize = 28.sp,
-                                    fontFamily = nothingFontFamily,
-                                    fontWeight = FontWeight.ExtraBold,
-
-                                    )
-
-
+                                Icon(
+                                    painter = painterResource(R.drawable.bug),
+                                    contentDescription = "Reset Attendance",
+                                    modifier = Modifier.size(36.dp),
+                                    tint = if (isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
+                                )
                             }
                         }
-                        TimeBasedGreeting()
-                        Text(
-                            text = "In Development",
-                            color = MaterialTheme.colorScheme.secondary, // Lighter color
-                            fontSize = 12.sp,
-                            fontFamily = roundFontFamily,
-                            fontWeight = FontWeight.Normal,
-                            modifier = Modifier.alpha(0.5f)
-                        )
-                        Box(
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .requiredHeightIn(50.dp,60.dp)
+                            .shadow(15.dp, shape = RoundedCornerShape(50))
+                            .clip(RoundedCornerShape(50))
+                            .background(contentColor)
+                    ) {
+                        Row(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 600.dp)// Height based on content
-                                .padding(top = 25.dp, bottom = 30.dp)
-                                .clip(
-                                    RoundedCornerShape(20.dp)
-                                )
-                                .background(contentColor.copy(alpha = 0.9f))
-
-                                .weight(1f)
+                                .fillMaxSize()
+                                .padding(horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-
-
+                            Text(
+                                text = "SHARE APP",
+                                fontFamily = nothingFontFamily,
+                                color = if (isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                                fontSize = 18.sp
+                            )
+                            IconButton(
+                                onClick = {},
+                                modifier = Modifier.size(42.dp),
+                            ) {
+                                Icon(
+                                    Icons.Default.Share,
+                                    contentDescription = "Reset Attendance",
+                                    modifier = Modifier.size(36.dp),
+                                    tint = if (isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
+                                )
+                            }
                         }
-
-
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .requiredHeightIn(50.dp,60.dp)
+                            .shadow(15.dp, shape = RoundedCornerShape(50))
+                            .clip(RoundedCornerShape(50))
+                            .background(contentColor)
+                            .clickable{
+                                deleteDialog = true
+                            }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "RESET APP",
+                                fontFamily = nothingFontFamily,
+                                color = if (isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                                fontSize = 18.sp
+                            )
+                            IconButton(
+                                onClick = {},
+                                modifier = Modifier.size(42.dp),
+                            ) {
+                                Icon(
+                                    Icons.Default.Refresh,
+                                    contentDescription = "Reset Attendance",
+                                    modifier = Modifier.size(36.dp),
+                                    tint = if (isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
+                                )
+                            }
+                        }
+                    }
+                    Column (
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 20.dp, top = 80.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally)
+                    {
+                        Row {
+                            Text(
+                                "Developed with ",
+                            )
+                            LottieAnimation(
+                                composition = composition1,
+                                progress = { progress1 },
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
+                        TypeWriterWithCursor(
+                            "IRONHEART PRODUCTION",
+                            fontSize = 26,
+                            color = contentColor
+                        )
                     }
                 }
-            }
+
         }
     }
+
 }
+
+ fun Bug(context: Context){
+     val intent = Intent(Intent.ACTION_SENDTO).apply {
+         data = Uri.parse("mailto:ironheartx09@gmail.com")
+         putExtra(Intent.EXTRA_SUBJECT, "Bug Report")
+         putExtra(Intent.EXTRA_TEXT, "Describe your issue here...")
+     }
+     context.startActivity(intent)
+ }
