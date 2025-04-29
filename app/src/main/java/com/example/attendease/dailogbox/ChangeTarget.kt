@@ -2,11 +2,13 @@ package com.example.attendease.dailogbox
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -16,24 +18,31 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.attendease.ui.theme.nothingFontFamily
 
 @Composable
 fun ChangeTargetDialog(
     currentTarget: Float,
     onDismiss: () -> Unit,
-    onConfirm: (Int) -> Unit
+    onConfirm: (Int) -> Unit,
+    contentColor: Color
 ) {
     var sliderValue by remember { mutableFloatStateOf(currentTarget) }
     var editTextValue by remember { mutableStateOf(currentTarget.toString()) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Set Attendance Target") },
+        containerColor = contentColor,
+        title = { Text("Set Attendance Target",fontFamily = nothingFontFamily) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text("Choose your attendance target (%)")
+                Text("Choose your attendance target (%)",fontFamily = nothingFontFamily)
 
                 Slider(
                     value = sliderValue,
@@ -41,8 +50,8 @@ fun ChangeTargetDialog(
                         sliderValue = it
                         editTextValue = it.toInt().toString()
                     },
-                    valueRange = 50f..100f,
-                    steps = 50,
+                    valueRange = 20f..90f,
+                    steps = 70,
                 )
 
                 OutlinedTextField(
@@ -50,30 +59,31 @@ fun ChangeTargetDialog(
                     onValueChange = { text ->
                         editTextValue = text
                         text.toFloatOrNull()?.let {
-                            if (it in 50f..100f) {
+                            if (it in 20f..90f) {
                                 sliderValue = it
                             }
                         }
                     },
-                    label = { Text("Target (%)") },
+                    label = { Text("Target (%)",fontFamily = nothingFontFamily) },
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
                 )
 
             }
         },
         confirmButton = {
-            Button(
+            OutlinedButton(
                 onClick = {
                     onConfirm(sliderValue.toInt())
                 }
             ) {
-                Text("Save")
+                Text("SAVE",fontFamily = nothingFontFamily,textAlign = TextAlign.Center)
             }
         },
         dismissButton = {
             Button(onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error.copy(alpha = 0.65f))){
-                Text("Cancel")
+                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error),
+                modifier = Modifier.shadow(5.dp, shape = RoundedCornerShape(50))){
+                Text("CANCEL",fontFamily = nothingFontFamily, textAlign = TextAlign.Center)
             }
         }
     )

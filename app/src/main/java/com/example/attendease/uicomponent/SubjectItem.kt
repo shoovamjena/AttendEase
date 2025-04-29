@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -47,12 +46,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.attendease.R
 import com.example.attendease.UserPreferences
 import com.example.attendease.dailogbox.DeleteDialog
+import com.example.attendease.dailogbox.ResetDialog
 import com.example.attendease.model.DetailViewModel
 import com.example.attendease.subjectdata.Subject
 import com.example.attendease.ui.theme.nothingFontFamily
@@ -65,8 +64,8 @@ fun SubjectItem(
     onAbsent: () -> Unit,
     onDelete: () -> Unit,
     onEdit: () -> Unit,
-    onReset: () -> Unit,
     onClick: () -> Unit,
+    onReset: () -> Unit,
     viewModel: DetailViewModel,
     backgroundColor: Color,
     dialogColor: Color
@@ -77,12 +76,13 @@ fun SubjectItem(
     val contentColor = MaterialTheme.colorScheme.secondary
     var expanded by remember { mutableStateOf(false) }
     var deleteDialog by remember { mutableStateOf(false) }
+    var resetDialog by remember { mutableStateOf(false) }
     val currentTarget by userPreferences.targetFlow.collectAsState(initial = 75f)
     val requiredPercentage = currentTarget
     val targetDecimal = requiredPercentage/100f
     val adviceText =
         when {
-            (subject.attendancePercentage < requiredPercentage && subject.attendancePercentage!=0) -> {
+            (subject.attendancePercentage < requiredPercentage && subject.total!=0) -> {
                 val neededClasses = ceil((targetDecimal * subject.total - subject.attend) / (1-targetDecimal)).toInt()
                 "Attend next $neededClasses\nclasses to get on track"
             }
@@ -95,7 +95,7 @@ fun SubjectItem(
                 }
             }
 
-            subject.attendancePercentage == 0 -> {
+            subject.attendancePercentage == 0 && subject.total == 0 -> {
                 "New Session Begins!!"
             }
 
@@ -117,8 +117,20 @@ fun SubjectItem(
                 deleteDialog = false
                 expanded = false},
             containerColor = dialogColor,
-            text = "DELETE",
+            text = subject.name,
             toast = "${subject.name} IS DELETED!!"
+        )
+    }
+    if (resetDialog){
+        ResetDialog(
+            onConfirm = {
+                onReset()
+            },
+            onDismiss = {
+                resetDialog = false
+                expanded = false},
+            containerColor = dialogColor,
+            toast = "${subject.name} is Reset"
         )
     }
 
@@ -126,22 +138,23 @@ fun SubjectItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 8.dp),
         colors = CardColors(backgroundColor,contentColor,backgroundColor,contentColor),
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .clickable(onClick = onClick)
+                .padding(horizontal = 14.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                AdaptiveText(subject.name,32,3,10,modifier = Modifier.padding(top = 10.dp, start = 20.dp),
+                AdaptiveText(subject.name,32,4,10,modifier = Modifier.padding(top = 10.dp, start = 20.dp),
                     nothingFontFamily)
+                Spacer(modifier = Modifier.weight(1f))
                 Box {
                     IconButton(
                         onClick = { expanded = true },
@@ -193,8 +206,7 @@ fun SubjectItem(
                                 )
                             },
                             onClick = {
-                                onReset()
-                                expanded = false
+                                resetDialog = true
                             },
                         )
                         DropdownMenuItem(
@@ -215,10 +227,6 @@ fun SubjectItem(
                 }
             }
 
-            Column(modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp)
-                ,) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -227,7 +235,7 @@ fun SubjectItem(
                         Text(text = "Attended: ${subject.attend}", fontSize = 18.sp) // Left align
                         Text(text = "Total: ${subject.total}", modifier = Modifier.padding(top = 10.dp), fontSize = 18.sp)
                     }
-                    Spacer(modifier = Modifier.width(5.dp))
+                    Spacer(modifier = Modifier.weight(1f))
                     Column {
                         val animatedPercentage by animateIntAsState(
                             targetValue = subject.attendancePercentage,
@@ -276,6 +284,10 @@ fun SubjectItem(
                             ),
                             modifier = Modifier
                                 .size(46.dp)
+                                .shadow(
+                                    elevation = 5.dp,
+                                    shape = RoundedCornerShape(50),
+                                )
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.close),
@@ -286,7 +298,7 @@ fun SubjectItem(
                 }
 
             }
-        }
+
     }
 }
 

@@ -43,7 +43,17 @@
             android:largeHeap="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AttendEase"
-            android:enableOnBackInvokedCallback="true"/>
+            android:enableOnBackInvokedCallback="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="rzp"
+                    android:host="rzp.io" />
+            </intent-filter>
+        </activity>
 
         <service
             android:name=".notification.NotificationForegroundService"

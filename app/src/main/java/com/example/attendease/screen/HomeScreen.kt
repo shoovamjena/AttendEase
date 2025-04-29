@@ -1,4 +1,4 @@
-
+@file:Suppress("NAME_SHADOWING")
 
 package com.example.attendease.screen
 
@@ -54,22 +54,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.text.isDigitsOnly
 import androidx.navigation.NavController
 import com.example.attendease.UserPreferences
 import com.example.attendease.dailogbox.AddSubject
 import com.example.attendease.dailogbox.AttendanceDialog
 import com.example.attendease.dailogbox.ChangeTargetDialog
-import com.example.attendease.dailogbox.DeleteDialog
 import com.example.attendease.dailogbox.EditSubject
+import com.example.attendease.dailogbox.ResetDialog
 import com.example.attendease.model.DetailViewModel
 import com.example.attendease.model.MainViewModel
 import com.example.attendease.model.SubjectViewModel
@@ -116,7 +117,7 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val isLava = Build.BRAND.equals("lava", ignoreCase = true)
-    var deleteDialog by remember { mutableStateOf(false) }
+    var resetDialog by remember { mutableStateOf(false) }
     var addSubjectDialog by rememberSaveable  { mutableStateOf(false) }
     var showChangeTargetDialog by remember { mutableStateOf(false) }
     var editSubjectDialog by rememberSaveable { mutableStateOf(false) }
@@ -249,6 +250,7 @@ fun HomeScreen(
     val currentTarget by userPreferences.targetFlow.collectAsState(initial = 75f)
     if (showChangeTargetDialog) {
         ChangeTargetDialog(
+            contentColor = contentColor,
             currentTarget = currentTarget,
             onDismiss = { showChangeTargetDialog = false },
             onConfirm = { newTarget ->
@@ -270,17 +272,16 @@ fun HomeScreen(
             },
         )
     }
-    if (deleteDialog){
-        DeleteDialog(
+    if (resetDialog){
+        ResetDialog(
             onConfirm = {
                 viewModel.resetSubjects()
                 viewModel4.resetTimetable()
             },
             onDismiss = {
-                deleteDialog = false
+                resetDialog = false
                 expanded = false},
             containerColor = contentColor,
-            text = "RESET",
             toast = "ALL RECORDS DELETED!!"
         )
     }
@@ -303,7 +304,14 @@ fun HomeScreen(
         }
         else {
             Scaffold(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && (resetDialog || showChangeTargetDialog ||
+                                    attendanceDialog || editSubjectDialog || addSubjectDialog)) {
+                            renderEffect = BlurEffect(radiusX = 10.dp.toPx(), radiusY = 10.dp.toPx())
+                        }
+                    },
                 bottomBar = {
                     Box(
                         modifier = Modifier
@@ -333,7 +341,7 @@ fun HomeScreen(
                         }
                     }
                 }
-            ) { paddingValues ->
+            ) { _ ->
 
                     Box(
                         modifier = Modifier
@@ -356,7 +364,7 @@ fun HomeScreen(
                                 color = contentColor,
                                 fontSize = 38.sp,
                                 textAlign = TextAlign.Center,
-                                fontFamily = roundFontFamily
+                                fontFamily = roundFontFamily,
                             )
                         }
                     }
@@ -400,7 +408,7 @@ fun HomeScreen(
                                         fontWeight = FontWeight.ExtraBold,
 
                                         )
-                                    Box {
+                                    Box(modifier = Modifier.shadow(5.dp, shape = RoundedCornerShape(50))) {
 
                                         IconButton(
                                             onClick = { expanded = true },
@@ -477,7 +485,7 @@ fun HomeScreen(
                                                 },
                                                 onClick = {
                                                     if (subjects.isNotEmpty()){
-                                                    deleteDialog = true}
+                                                    resetDialog = true}
                                                     else{
                                                         Toast.makeText(context,"No records to delete !!", Toast.LENGTH_LONG).show()
                                                         expanded = false
@@ -503,6 +511,7 @@ fun HomeScreen(
                                     .fillMaxWidth()
                                     .heightIn(min = 500.dp)// Height based on content
                                     .padding(top = 25.dp, bottom = 30.dp)
+                                    .shadow(10.dp, shape = RoundedCornerShape(20.dp))
                                     .clip(
                                         RoundedCornerShape(20.dp)
                                     )
@@ -551,9 +560,9 @@ fun HomeScreen(
                                                 viewModel2.getAttendanceRecords(subject.id)
                                                 attendanceDialog = true
                                             },
-                                            viewModel2,
-                                            if(isDark && !isLava)MaterialTheme.colorScheme.tertiaryContainer else backgroundColor,
-                                            contentColor
+                                            viewModel = viewModel2,
+                                            backgroundColor = if(isDark && !isLava)MaterialTheme.colorScheme.tertiaryContainer else backgroundColor,
+                                            dialogColor = contentColor
                                         )
                                     }
                                 }
@@ -561,15 +570,18 @@ fun HomeScreen(
                                     AttendanceDialog(
                                         subject = subject,
                                         viewModel = viewModel2,
-                                        onDismiss = { attendDetail = null },
+                                        onDismiss = {
+                                            attendDetail = null
+                                            attendanceDialog = false },
                                         contentColor,
-                                        backgroundColor
+                                        backgroundColor,
+                                        navController
                                     )
                                 }
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(30.dp)
+                                        .height(35.dp)
                                         .align(Alignment.BottomCenter)
                                         .drawWithCache {
                                             onDrawBehind {
@@ -577,7 +589,7 @@ fun HomeScreen(
                                                 drawRect(
                                                     Brush.linearGradient(
                                                         colors = listOf(
-                                                            backgroundColor,
+                                                            contentColor,
                                                             Color.Transparent
                                                         ),
                                                         start = Offset(0f, size.height),
@@ -592,7 +604,7 @@ fun HomeScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(30.dp)
+                                        .height(35.dp)
                                         .align(Alignment.TopCenter)
                                         .drawWithCache {
                                             onDrawBehind {
@@ -601,7 +613,7 @@ fun HomeScreen(
                                                     Brush.linearGradient(
                                                         colors = listOf(
                                                             Color.Transparent,
-                                                            backgroundColor
+                                                            contentColor
                                                         ),
                                                         start = Offset(0f, size.height),
                                                         end = Offset(0f, 0f)
@@ -612,6 +624,7 @@ fun HomeScreen(
                                             }
                                         }
                                 ) { }
+
                                 IconButton(
                                     onClick = { addSubjectDialog = true },
                                     colors = IconButtonDefaults.iconButtonColors(

@@ -1,0 +1,244 @@
+package com.example.attendease.screen
+
+import android.os.Build
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.attendease.UserPreferences
+import com.example.attendease.dailogbox.DeleteDialog
+import com.example.attendease.dailogbox.EditAttendanceDialog
+import com.example.attendease.model.DetailViewModel
+import com.example.attendease.ui.theme.ThemePreference
+import com.example.attendease.ui.theme.coinyFontFamily
+import com.example.attendease.ui.theme.nothingFontFamily
+import com.example.attendease.ui.theme.roundFontFamily
+import com.example.attendease.uicomponent.AdaptiveText
+import com.example.attendease.uicomponent.AnimatedBackButton
+import com.example.attendease.uicomponent.AttendanceItemDetailed
+import com.example.attendease.uicomponent.bottomnavbar.Screen
+import kotlinx.coroutines.delay
+
+@Composable
+fun AttendanceDetailExpanded(
+    subject: String,
+    navController: NavController,
+    selectedColor: Int?,
+    viewModel: DetailViewModel,
+    userPreference: UserPreferences
+){
+    var editDialog by remember { mutableStateOf(false) }
+    var deleteDialog by remember { mutableStateOf(false) }
+    var attendanceIdToChange by remember { mutableStateOf<Int?>(null) }
+    var subjectId by remember { mutableStateOf<Int?>(null) }
+    var currentStatus by remember { mutableStateOf("") }
+
+
+    val themePref by userPreference.themePreferenceFlow.collectAsState(initial = ThemePreference.LIGHT)
+    val isDark = when (themePref) {
+        ThemePreference.DARK -> true
+        ThemePreference.LIGHT -> false
+        ThemePreference.SYSTEM_DEFAULT -> isSystemInDarkTheme()
+    }
+    val attendanceRecords by viewModel.attendanceRecords.collectAsState()
+    val selectColor = selectedColor?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
+    val isLava = Build.BRAND.equals("lava", ignoreCase = true)
+    val isAndroid12OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    if(isLava){
+        if(isDark)
+            MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
+    }else {
+        if(isDark)MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onPrimary
+    }
+    val contentColor = if (isLava){
+        MaterialTheme.colorScheme.onPrimary
+    }else {
+        if (isAndroid12OrAbove) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            selectColor
+        }
+    }
+    if(deleteDialog){
+        DeleteDialog(
+            onDismiss = { deleteDialog = false
+                        navController.navigate(Screen.Home.route)},
+            onConfirm = { viewModel.deleteDetail(attendanceIdToChange!!, subjectId!!)
+                        deleteDialog = false},
+            containerColor = contentColor,
+            text = "Attendance for $subject",
+            toast = "Attendance for $subject is deleted"
+        )
+    }
+    if(editDialog){
+        EditAttendanceDialog(
+            onDismiss = { editDialog = false },
+            containerColor = contentColor,
+            onPresent = {
+                if (currentStatus == "Absent") {
+                    viewModel.updateDetail(subjectId!!,attendanceIdToChange!!,"Present")
+                }
+                editDialog = false
+            },
+            onAbsent = {
+                if (currentStatus == "Present") {
+                    viewModel.updateDetail(subjectId!!,attendanceIdToChange!!,"Absent")
+                }
+                editDialog = false
+            },
+            status = currentStatus
+        )
+    }
+    var isReady by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(500)
+        isReady = true
+    }
+    if (!isReady) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Transparent), contentAlignment = Alignment.Center) {
+            Text(text = "LOADING...", fontSize = 42.sp, fontFamily = nothingFontFamily, fontWeight = FontWeight.Bold, color = contentColor)        }
+    } else {
+        Scaffold(
+            modifier = Modifier.fillMaxSize()
+                .graphicsLayer {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && (editDialog || deleteDialog)) {
+                        renderEffect =
+                            BlurEffect(radiusX = 10.dp.toPx(), radiusY = 10.dp.toPx())
+                    }
+                },
+            bottomBar = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp)
+                        .heightIn(min = 30.dp)
+                        .windowInsetsPadding(WindowInsets.navigationBars)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp)
+                            .shadow(26.dp)
+                            .clip(RoundedCornerShape(percent = 50))
+                            .background(contentColor.copy(alpha = 0.1f)),
+                    ) {
+                        AnimatedBackButton(navController = navController, contentColor)
+                    }
+                }
+            }
+        ) { _ ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .heightIn(min = 30.dp)
+                    .windowInsetsPadding(WindowInsets.statusBars)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "ATTENDEASE",
+                        color = contentColor,
+                        fontSize = 38.sp,
+                        textAlign = TextAlign.Center,
+                        fontFamily = roundFontFamily,
+                        style = TextStyle(
+                            shadow = Shadow(
+                                color = Color.Gray,
+                                offset = Offset(4f, 4f),
+                                blurRadius = 14f)
+                        )
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp)
+                        .heightIn(max = 650.dp)
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                        .padding(top = 70.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Attendance Details of",
+                        fontSize = 24.sp,
+                        fontFamily = coinyFontFamily,
+                        color = MaterialTheme.colorScheme.tertiaryContainer
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    AdaptiveText(subject,32,3,10,modifier = Modifier.padding(top = 10.dp, start = 20.dp),
+                        nothingFontFamily)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(contentColor.copy(0.3f))
+                    ) {
+                        LazyColumn {
+                            items(attendanceRecords) { record ->
+                                AttendanceItemDetailed(
+                                    record,
+                                    onDelete = {
+                                        attendanceIdToChange = record.attendId
+                                        subjectId = record.id
+                                        deleteDialog = true
+                                    },
+                                    onEdit = {
+                                        currentStatus = record.status
+                                        attendanceIdToChange = record.attendId
+                                        subjectId = record.id
+                                        editDialog = true
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

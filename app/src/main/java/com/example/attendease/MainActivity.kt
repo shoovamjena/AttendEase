@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -21,6 +22,7 @@ import com.example.attendease.attendancedata.AttendanceDatabase
 import com.example.attendease.attendancedata.AttendanceRepository
 import com.example.attendease.model.DetailViewModel
 import com.example.attendease.model.MainViewModel
+import com.example.attendease.model.PaymentViewModel
 import com.example.attendease.model.SubjectViewModel
 import com.example.attendease.model.SubjectViewModelFactory
 import com.example.attendease.model.TimetableViewModel
@@ -35,10 +37,13 @@ import com.example.attendease.timetabledata.TimetableDatabase
 import com.example.attendease.timetabledata.TimetableRepository
 import com.example.attendease.ui.theme.AttendEaseTheme
 import com.example.attendease.ui.theme.ThemePreference
+import com.razorpay.PaymentData
+import com.razorpay.PaymentResultWithDataListener
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity(), PaymentResultWithDataListener{
+    private val paymentViewModel: PaymentViewModel by viewModels()
     private lateinit var alarmScheduler: AlarmScheduler
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -77,7 +82,7 @@ class MainActivity : ComponentActivity() {
 
         val viewModelFactory = SubjectViewModelFactory(subjectRepository)
         val subjectViewModel = ViewModelProvider(this, viewModelFactory)[SubjectViewModel::class.java]
-        val detailViewModel = DetailViewModel(attendanceRepository)
+        val detailViewModel = DetailViewModel(attendanceRepository,subjectRepository)
         val timeTableViewModel = TimetableViewModel(timetableRepository)
         alarmScheduler = AlarmScheduler(this)
         fun startNotificationService() {
@@ -97,9 +102,6 @@ class MainActivity : ComponentActivity() {
                 }
                 .setCancelable(false)
                 .show()
-        }
-        fun refreshNotifications() {
-            alarmScheduler.scheduleAllAlarms()
         }
         // Check for exact alarm permission
         if (!alarmScheduler.canScheduleExactAlarms()) {
@@ -147,7 +149,8 @@ class MainActivity : ComponentActivity() {
                                 subjectViewModel = subjectViewModel,
                                 detailViewModel = detailViewModel,
                                 timetableViewModel = timeTableViewModel,
-                                mainViewModel = viewModel
+                                mainViewModel = viewModel,
+                                paymentViewModel = paymentViewModel
                             )
                         }
                     }
@@ -156,5 +159,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onPaymentSuccess(razorpayPaymentID: String?, paymentData: PaymentData?) {
+        if (razorpayPaymentID != null) {
+            paymentViewModel.handlePaymentSuccess(razorpayPaymentID)
+        }
+    }
+
+    override fun onPaymentError(code: Int, response: String?, paymentData: PaymentData?) {
+        if (response != null) {
+            paymentViewModel.handlePaymentError()
+        }
+    }
 }
 

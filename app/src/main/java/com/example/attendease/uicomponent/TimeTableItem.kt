@@ -62,7 +62,7 @@ fun TimeTableItem(
                 deleteDialog = false
                 expanded = false},
             containerColor = dialogColor,
-            text = "DELETE",
+            text = timetable.subjectName,
             toast = "${timetable.subjectName} CLASS AT ${timetable.startTime} IS DELETED"
         )
     }

@@ -24,7 +24,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -44,8 +43,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -226,7 +227,13 @@ fun TimeTableScreen(
             Text(text = "LOADING...", fontSize = 42.sp, fontFamily = nothingFontFamily, fontWeight = FontWeight.Bold, color = contentColor)        }
     } else {
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && (addClassDialog || editClassDialog)) {
+                        renderEffect = BlurEffect(radiusX = 10.dp.toPx(), radiusY = 10.dp.toPx())
+                    }
+                },
             bottomBar = {
                 Box(
                     modifier = Modifier
@@ -256,7 +263,7 @@ fun TimeTableScreen(
                     }
                 }
             }
-        ) { paddingValues ->
+        ) { _ ->
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -275,7 +282,7 @@ fun TimeTableScreen(
                             color = contentColor,
                             fontSize = 38.sp,
                             textAlign = TextAlign.Center,
-                            fontFamily = roundFontFamily
+                            fontFamily = roundFontFamily,
                         )
                     }
                 }
@@ -354,7 +361,7 @@ fun TimeTableScreen(
                                             drawRect(
                                                 Brush.linearGradient(
                                                     colors = listOf(
-                                                        backgroundColor,
+                                                        contentColor,
                                                         Color.Transparent
                                                     ),
                                                     start = Offset(0f, size.height),
@@ -378,7 +385,7 @@ fun TimeTableScreen(
                                                 Brush.linearGradient(
                                                     colors = listOf(
                                                         Color.Transparent,
-                                                        backgroundColor
+                                                        contentColor
                                                     ),
                                                     start = Offset(0f, size.height),
                                                     end = Offset(0f, 0f)

@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -104,13 +105,14 @@ fun EditSubject(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Button(onClick = onDismiss) {
-                        Text(text = "Cancel", color = MaterialTheme.colorScheme.onPrimary)
+                    Button(onClick = onDismiss,
+                        modifier = Modifier.shadow(5.dp, shape = RoundedCornerShape(50))) {
+                        Text(text = "CANCEL", color = MaterialTheme.colorScheme.onPrimary, fontFamily = nothingFontFamily)
                     }
                     OutlinedButton(onClick = {
                         onConfirm()
                     }) {
-                        Text(text = "Confirm", color = MaterialTheme.colorScheme.primary)
+                        Text(text = "CONFIRM", color = MaterialTheme.colorScheme.primary, fontFamily = nothingFontFamily)
                     }
                 }
             }

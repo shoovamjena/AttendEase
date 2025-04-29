@@ -1,11 +1,13 @@
 package com.example.attendease.screen
 
+import android.Manifest
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,22 +47,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.ui.draw.alpha
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -119,10 +122,24 @@ fun SettingsScreen(
     var isNotificationOn by remember {
         mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled())
     }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // Update notification state when app resumes
+                isNotificationOn = NotificationManagerCompat.from(context).areNotificationsEnabled()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        // Update toggle state based on result
+    ) { _ ->
         isNotificationOn = NotificationManagerCompat.from(context).areNotificationsEnabled()
     }
 
@@ -144,15 +161,6 @@ fun SettingsScreen(
         restartOnPlay = false
     )
 
-    val composition2 by rememberLottieComposition(
-        spec = LottieCompositionSpec.RawRes(R.raw.hearts)
-    )
-    val progress2 by animateLottieCompositionAsState(
-        composition = composition2,
-        iterations = LottieConstants.IterateForever,
-        isPlaying = true,
-        restartOnPlay = false
-    )
     if (deleteDialog){
         DeleteDialog(
             onConfirm = {
@@ -172,7 +180,13 @@ fun SettingsScreen(
             Text(text = "LOADING...", fontSize = 42.sp, fontFamily = nothingFontFamily, fontWeight = FontWeight.Bold, color = contentColor)        }
     } else {
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && deleteDialog) {
+                        renderEffect = BlurEffect(radiusX = 10.dp.toPx(), radiusY = 10.dp.toPx())
+                    }
+                },
             bottomBar = {
                 Column (
                     modifier = Modifier
@@ -182,11 +196,7 @@ fun SettingsScreen(
                         .windowInsetsPadding(WindowInsets.navigationBars),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-//                    LottieAnimation(
-//                        composition = composition2,
-//                        progress = { progress2 },
-//                        modifier = Modifier.size(500.dp).alpha(0.5f)
-//                    )
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -206,7 +216,7 @@ fun SettingsScreen(
 
                 }
             }
-        ) { paddingValues ->
+        ) { _ ->
 
                 Column(
                     modifier = Modifier
@@ -227,7 +237,7 @@ fun SettingsScreen(
                             color = contentColor,
                             fontSize = 38.sp,
                             textAlign = TextAlign.Center,
-                            fontFamily = roundFontFamily
+                            fontFamily = roundFontFamily,
                         )
 
 
@@ -270,25 +280,35 @@ fun SettingsScreen(
                                     onToggleChange = {
                                         if (isNotificationOn) {
                                             // Open settings to turn OFF
-                                            val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                                                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                                            }
+                                            val intent =
+                                                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                                    putExtra(
+                                                        Settings.EXTRA_APP_PACKAGE,
+                                                        context.packageName
+                                                    )
+                                                }
                                             context.startActivity(intent)
-                                            isNotificationOn = !isNotificationOn
                                         } else {
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                                if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.POST_NOTIFICATIONS)) {
+                                                if (ActivityCompat.shouldShowRequestPermissionRationale(
+                                                        activity,
+                                                        Manifest.permission.POST_NOTIFICATIONS
+                                                    )
+                                                ) {
                                                     // Show system permission dialog again
                                                     notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-
+                                                } else {
+                                                    // Already denied once, redirect to settings
+                                                    val intent =
+                                                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                                            data = Uri.fromParts(
+                                                                "package",
+                                                                context.packageName,
+                                                                null
+                                                            )
+                                                        }
+                                                    context.startActivity(intent)
                                                 }
-                                            }else {
-                                                // Already denied once, redirect to settings
-                                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                                    data = Uri.fromParts("package", context.packageName, null)
-                                                }
-                                                context.startActivity(intent)
-                                                isNotificationOn = !isNotificationOn
                                             }
                                         }
                                     }
@@ -312,15 +332,16 @@ fun SettingsScreen(
                                             }
                                             context.startActivity(intent)
                                         } else {
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                                ActivityCompat.requestPermissions(
-                                                    context as Activity,
-                                                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                                                    101
+
+                                            val intent = Intent().apply {
+                                                action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                                                putExtra(
+                                                    Settings.EXTRA_APP_PACKAGE,
+                                                    context.packageName
                                                 )
                                             }
+                                            context.startActivity(intent)
                                         }
-
                                     }
                                 )
                             }
@@ -376,7 +397,12 @@ fun SettingsScreen(
                             .clip(RoundedCornerShape(50))
                             .background(contentColor)
                             .clickable {
-                                Bug(context)
+                                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                    data = Uri.parse("mailto:ironheartx09@gmail.com")
+                                    putExtra(Intent.EXTRA_SUBJECT, "Bug Report")
+                                    putExtra(Intent.EXTRA_TEXT, "Describe your issue here...")
+                                }
+                                context.startActivity(intent)
                             }
                     ) {
                         Row(
@@ -394,7 +420,12 @@ fun SettingsScreen(
                             )
                             IconButton(
                                 onClick = {
-                                    Bug(context)
+                                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                        data = Uri.parse("mailto:ironheartx09@gmail.com")
+                                        putExtra(Intent.EXTRA_SUBJECT, "Bug Report")
+                                        putExtra(Intent.EXTRA_TEXT, "Describe your issue here...")
+                                    }
+                                    context.startActivity(intent)
                                 },
                                 modifier = Modifier.size(42.dp),
                             ) {
@@ -468,7 +499,9 @@ fun SettingsScreen(
                                 fontSize = 18.sp
                             )
                             IconButton(
-                                onClick = {},
+                                onClick = {
+                                    deleteDialog = true
+                                },
                                 modifier = Modifier.size(42.dp),
                             ) {
                                 Icon(
@@ -486,7 +519,7 @@ fun SettingsScreen(
                             .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 20.dp, top = 80.dp),
                         horizontalAlignment = Alignment.CenterHorizontally)
                     {
-                        Row {
+                        Row{
                             Text(
                                 "Developed with ",
                             )
@@ -510,11 +543,3 @@ fun SettingsScreen(
 
 }
 
- fun Bug(context: Context){
-     val intent = Intent(Intent.ACTION_SENDTO).apply {
-         data = Uri.parse("mailto:ironheartx09@gmail.com")
-         putExtra(Intent.EXTRA_SUBJECT, "Bug Report")
-         putExtra(Intent.EXTRA_TEXT, "Describe your issue here...")
-     }
-     context.startActivity(intent)
- }

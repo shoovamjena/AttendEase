@@ -7,11 +7,11 @@ class AttendanceRepository(
 ) {
 
     fun insertAttendanceRecord(subjectId: Int, status: String) {
-        val currentTime = System.currentTimeMillis()  // Get current timestamp
+        val currentTime = System.currentTimeMillis()
         val attendanceRecord = Attendance(
             id = subjectId,
-            dateTime = currentTime,  // Store the timestamp
-            status = status,// "Present" or "Absent"
+            dateTime = currentTime,
+            status = status,
         )
         attendanceDao.addDetail(attendanceRecord)  // Insert record
     }
@@ -22,6 +22,14 @@ class AttendanceRepository(
 
     fun getAttendanceRecords(subjectId: Int): Flow<List<Attendance>> {
         return attendanceDao.getAllDetail(subjectId)
+    }
+
+    fun deleteDetail(attendId: Int){
+        attendanceDao.deleteAttendance(attendId)
+    }
+
+    fun updateDetail(subjectId: Int, status: String){
+        attendanceDao.updateDetail(subjectId,status)
     }
 
 }

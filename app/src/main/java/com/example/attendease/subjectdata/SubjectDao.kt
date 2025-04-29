@@ -36,4 +36,13 @@ interface SubjectDao {
 
     @Query("SELECT * FROM subject WHERE id = :subjectId")
     fun getSubjectById(subjectId: Int): Subject
+
+    @Query("UPDATE subject SET attend = attend + 1 WHERE id = :id")
+    fun markPresentAttendance(id: Int)
+
+    @Query("UPDATE subject SET attend = attend - 1 WHERE id = :id")
+    fun markAbsentAttendance(id: Int)
+
+    @Query("UPDATE subject SET attend = attend -1, total = total -1 WHERE id = :id")
+    fun deleteAttendance(id:Int)
 }

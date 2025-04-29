@@ -21,4 +21,10 @@ interface AttendanceDao {
 
     @Query("SELECT * FROM attendance WHERE id = :subjectId")
     fun getSubjectById(subjectId: Int): Int
+
+    @Query("DELETE FROM attendance WHERE attendId = :id")
+    fun deleteAttendance(id:Int)
+
+    @Query("UPDATE attendance SET status = :newStatus WHERE attendId = :attendanceId")
+    fun updateDetail(attendanceId : Int, newStatus: String)
 }

@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -295,7 +296,8 @@ fun AddClass(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Button(onClick = onDismiss) {
+                        Button(onClick = onDismiss,
+                            modifier = Modifier.shadow(5.dp, shape = RoundedCornerShape(50))) {
                             Text(text = "Cancel", color = MaterialTheme.colorScheme.onPrimary)
                         }
                         OutlinedButton(onClick = onConfirm) {

@@ -5,13 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.attendease.attendancedata.Attendance
 import com.example.attendease.attendancedata.AttendanceRepository
 import com.example.attendease.subjectdata.Subject
+import com.example.attendease.subjectdata.SubjectRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 
-class DetailViewModel(private val repository: AttendanceRepository) : ViewModel() {
+class DetailViewModel(private val repository: AttendanceRepository,private  val subjectRepository: SubjectRepository) : ViewModel() {
 
     private val _attendanceRecords = MutableStateFlow<List<Attendance>>(emptyList())
     val attendanceRecords = _attendanceRecords.asStateFlow()
@@ -35,6 +36,24 @@ class DetailViewModel(private val repository: AttendanceRepository) : ViewModel(
                 .collect { records ->
                     _attendanceRecords.value = records
                 }
+        }
+    }
+
+    fun deleteDetail(attendId: Int,subjectId: Int){
+        viewModelScope.launch (Dispatchers.IO){
+            repository.deleteDetail(attendId)
+            subjectRepository.deleteAttendance(subjectId)
+        }
+    }
+
+    fun updateDetail(subjectId: Int,attendId: Int, status: String){
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateDetail(attendId,status)
+            if (status == "Present") {
+                subjectRepository.presentAttendance(subjectId)
+            } else {
+                subjectRepository.absentAttendance(subjectId)
+            }
         }
     }
 

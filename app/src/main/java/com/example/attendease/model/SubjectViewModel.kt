@@ -66,7 +66,6 @@ class SubjectViewModel(private val repository: SubjectRepository) : ViewModel() 
         }
     }
 
-
 }
 
 @Suppress("UNCHECKED_CAST")

@@ -79,5 +79,6 @@ dependencies {
     implementation (libs.lottie.compose.v610 )
     implementation (libs.androidx.work.runtime.ktx)
     implementation (libs.androidx.core.ktx.v1120)
+    implementation (libs.checkout)
 
 }

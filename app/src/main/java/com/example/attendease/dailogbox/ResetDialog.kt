@@ -37,14 +37,12 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.attendease.R
 import com.example.attendease.ui.theme.nothingFontFamily
-import com.example.attendease.ui.theme.roundFontFamily
 
 @Composable
-fun DeleteDialog(
+fun ResetDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     containerColor: Color,
-    text: String,
     toast: String
 ){
     val context = LocalContext.current
@@ -89,36 +87,28 @@ fun DeleteDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (playAnimation) {
-                Text(
-                    text = "DELETE CONFIRMED",
-                    fontFamily = nothingFontFamily,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 24.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                LottieAnimation(
-                    composition = composition,
-                    progress = { progress },
-                    modifier = Modifier
-                        .height(90.dp)
-                        .fillMaxWidth()
-                )
+                    Text(
+                        text = "RESET CONFIRMED",
+                        fontFamily = nothingFontFamily,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 24.sp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
+                        modifier = Modifier
+                            .height(90.dp)
+                            .fillMaxWidth()
+                    )
                 }else {
                     Text(
-                        text = "CONFIRM DELETE",
+                        text = "CONFIRM RESET",
                         fontFamily = nothingFontFamily,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 26.sp,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    Text(
-                        text = text,
-                        fontFamily = roundFontFamily,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-
                     androidx.compose.foundation.Image(
                         painter = androidx.compose.ui.res.painterResource(id = R.drawable.deleteicon),
                         contentDescription = "Delete Icon",
