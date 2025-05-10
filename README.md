@@ -73,7 +73,7 @@ A one-man indie dev passion project – crafted to help students stay in control
 ---
 
 ### **🌈 Sleek, Adaptive UI/UX**
-- 🎨 Follows **Material You** – changes with your phone’s wallpaper
+- 🎨 Follows **Material You** – changes with your phone’s wallpaper (**Dynamic Themeing only Available on Android 12+ devices**)
 
 - 🌞 **Light Theme** / 🌚 **Dark Theme**
 
