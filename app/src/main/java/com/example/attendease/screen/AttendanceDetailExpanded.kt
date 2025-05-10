@@ -33,12 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlurEffect
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -62,7 +58,6 @@ import kotlinx.coroutines.delay
 fun AttendanceDetailExpanded(
     subject: String,
     navController: NavController,
-    selectedColor: Int?,
     viewModel: DetailViewModel,
     userPreference: UserPreferences
 ){
@@ -72,7 +67,6 @@ fun AttendanceDetailExpanded(
     var subjectId by remember { mutableStateOf<Int?>(null) }
     var currentStatus by remember { mutableStateOf("") }
 
-
     val themePref by userPreference.themePreferenceFlow.collectAsState(initial = ThemePreference.LIGHT)
     val isDark = when (themePref) {
         ThemePreference.DARK -> true
@@ -80,10 +74,9 @@ fun AttendanceDetailExpanded(
         ThemePreference.SYSTEM_DEFAULT -> isSystemInDarkTheme()
     }
     val attendanceRecords by viewModel.attendanceRecords.collectAsState()
-    val selectColor = selectedColor?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
     val isLava = Build.BRAND.equals("lava", ignoreCase = true)
     val isAndroid12OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    if(isLava){
+    val backgroundColor =if(isLava){
         if(isDark)
             MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
     }else {
@@ -92,23 +85,31 @@ fun AttendanceDetailExpanded(
     val contentColor = if (isLava){
         MaterialTheme.colorScheme.onPrimary
     }else {
-        if (isAndroid12OrAbove) {
-            MaterialTheme.colorScheme.primaryContainer
-        } else {
-            selectColor
-        }
+        MaterialTheme.colorScheme.primaryContainer
     }
     if(deleteDialog){
         DeleteDialog(
-            onDismiss = { deleteDialog = false
-                        navController.navigate(Screen.Home.route)},
-            onConfirm = { viewModel.deleteDetail(attendanceIdToChange!!, subjectId!!)
+            onDismiss = { deleteDialog = false},
+            onConfirm = { viewModel.deleteDetail(attendanceIdToChange!!, subjectId!!,currentStatus)
                         deleteDialog = false},
             containerColor = contentColor,
             text = "Attendance for $subject",
-            toast = "Attendance for $subject is deleted"
+            toast = "Attendance for $subject is deleted",
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
+    LaunchedEffect(attendanceRecords) {
+        if (attendanceRecords.isEmpty()) {
+            delay(800)
+            navController.navigate(Screen.Home.route) {
+                popUpTo(0) {
+                    inclusive = true
+                }
+                launchSingleTop = true
+            }
+        }
+    }
+
     if(editDialog){
         EditAttendanceDialog(
             onDismiss = { editDialog = false },
@@ -125,7 +126,8 @@ fun AttendanceDetailExpanded(
                 }
                 editDialog = false
             },
-            status = currentStatus
+            status = currentStatus,
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
     var isReady by remember { mutableStateOf(false) }
@@ -136,7 +138,7 @@ fun AttendanceDetailExpanded(
     if (!isReady) {
         Box(modifier = Modifier
             .fillMaxSize()
-            .background(Color.Transparent), contentAlignment = Alignment.Center) {
+            .background(backgroundColor), contentAlignment = Alignment.Center) {
             Text(text = "LOADING...", fontSize = 42.sp, fontFamily = nothingFontFamily, fontWeight = FontWeight.Bold, color = contentColor)        }
     } else {
         Scaffold(
@@ -185,20 +187,14 @@ fun AttendanceDetailExpanded(
                         color = contentColor,
                         fontSize = 38.sp,
                         textAlign = TextAlign.Center,
-                        fontFamily = roundFontFamily,
-                        style = TextStyle(
-                            shadow = Shadow(
-                                color = Color.Gray,
-                                offset = Offset(4f, 4f),
-                                blurRadius = 14f)
-                        )
+                        fontFamily = roundFontFamily
                     )
                 }
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 10.dp)
-                        .heightIn(max = 650.dp)
+                        .heightIn(min = 500.dp, max = 650.dp)
                         .windowInsetsPadding(WindowInsets.statusBars)
                         .padding(top = 70.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -215,14 +211,15 @@ fun AttendanceDetailExpanded(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(contentColor.copy(0.3f))
+                            .clip(RoundedCornerShape(9))
+                            .background(contentColor.copy(0.5f))
                     ) {
                         LazyColumn {
                             items(attendanceRecords) { record ->
                                 AttendanceItemDetailed(
                                     record,
                                     onDelete = {
+                                        currentStatus = record.status
                                         attendanceIdToChange = record.attendId
                                         subjectId = record.id
                                         deleteDialog = true

@@ -27,7 +27,6 @@ fun AppNavGraph(
     timetableViewModel: TimetableViewModel,
     detailViewModel: DetailViewModel,
     userName: String,
-    selectedColor: Int?,
     mainViewModel: MainViewModel,
     paymentViewModel: PaymentViewModel
 ) {
@@ -41,7 +40,6 @@ fun AppNavGraph(
         composable(Screen.Home.route) {
             HomeScreen(
                 userName = userName,
-                selectedColor = selectedColor,
                 viewModel = subjectViewModel,
                 viewModel2 = detailViewModel,
                 navController = navController,
@@ -51,13 +49,13 @@ fun AppNavGraph(
             )
         }
         composable(Screen.Timetable.route){
-            TimeTableScreen(selectedColor,navController,timetableViewModel,subjectViewModel, userPreference = UserPreferences(context))
+            TimeTableScreen(navController,timetableViewModel,subjectViewModel, userPreference = UserPreferences(context))
         }
         composable(Screen.Donate.route) {
-            DonateScreen(userName,selectedColor,navController,paymentViewModel)
+            DonateScreen(userName,navController,paymentViewModel,UserPreferences(context))
         }
         composable(Screen.Settings.route){
-            SettingsScreen(selectedColor,navController,subjectViewModel,timetableViewModel)
+            SettingsScreen(navController,subjectViewModel,timetableViewModel, userPreference = UserPreferences(context))
         }
         composable(
             route = "attendanceDetail/{subjectName}",
@@ -66,7 +64,6 @@ fun AppNavGraph(
             val subjectName = backStackEntry.arguments?.getString("subjectName")
             AttendanceDetailExpanded(
                 navController = navController,
-                selectedColor = selectedColor,
                 viewModel = detailViewModel,
                 userPreference = UserPreferences(context),
                 subject = subjectName ?: "",

@@ -37,7 +37,8 @@ fun SupportItem(
     lottieCompositionSpec: LottieCompositionSpec,
     title: String,
     amount: Int,
-    onSelect: () -> Unit
+    onSelect: () -> Unit,
+    isDark: Boolean
 ){
     val composition by rememberLottieComposition(
         spec = lottieCompositionSpec
@@ -59,7 +60,7 @@ fun SupportItem(
             .clip(
                 RoundedCornerShape(50)
             )
-            .background(contentColor.copy(alpha = 0.9f))
+            .background(contentColor)
             .clickable { onSelect() },
     ) {
         Row (
@@ -79,8 +80,8 @@ fun SupportItem(
             Spacer(modifier = Modifier.weight(0.1f))
             Text(
                 text = "(₹$amount)",
-                color = MaterialTheme.colorScheme.tertiary,
-                fontSize = 10.sp,
+                color = if(isDark) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
+                fontSize = 14.sp,
                 fontFamily = roundFontFamily,
                 fontWeight = FontWeight.ExtraBold,
                 modifier = Modifier.alpha(0.6f)

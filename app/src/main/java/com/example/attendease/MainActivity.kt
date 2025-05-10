@@ -29,7 +29,6 @@ import com.example.attendease.model.TimetableViewModel
 import com.example.attendease.navcontroller.AppNavGraph
 import com.example.attendease.notification.AlarmScheduler
 import com.example.attendease.notification.NotificationForegroundService
-import com.example.attendease.screen.ChooseColorScreen
 import com.example.attendease.screen.WelcomeScreen
 import com.example.attendease.subjectdata.SubjectDatabase
 import com.example.attendease.subjectdata.SubjectRepository
@@ -115,7 +114,6 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener{
 
         lifecycleScope.launch {
             val name = userPreferences.getUserName.first()
-            val storedColor = userPreferences.getThemeColor()
             checkNotificationPermission()
 
             if (name.isNullOrEmpty()) {
@@ -123,36 +121,30 @@ class MainActivity : ComponentActivity(), PaymentResultWithDataListener{
                     WelcomeScreen(onNavigateToMain = { recreate() })
                 }
             } else {
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && storedColor == null) {
-                    setContent { ChooseColorScreen() }
-                } else {
-                    setContent {
-                        val themePreference by userPreferences.themePreferenceFlow.collectAsState(
-                            initial = ThemePreference.SYSTEM_DEFAULT
+                setContent {
+                    val themePreference by userPreferences.themePreferenceFlow.collectAsState(
+                        initial = ThemePreference.SYSTEM_DEFAULT
+                    )
+                    val isDarkTheme = when (themePreference) {
+                        ThemePreference.LIGHT -> false
+                        ThemePreference.DARK -> true
+                        ThemePreference.SYSTEM_DEFAULT -> isSystemInDarkTheme()
+                    }
+                    val viewModel: MainViewModel = viewModel()
+                    val navController = rememberNavController()
+                    AttendEaseTheme(
+                        darkTheme = isDarkTheme,
+                        dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
+                    ) {
+                        AppNavGraph(
+                            navController = navController,
+                            userName = name,
+                            subjectViewModel = subjectViewModel,
+                            detailViewModel = detailViewModel,
+                            timetableViewModel = timeTableViewModel,
+                            mainViewModel = viewModel,
+                            paymentViewModel = paymentViewModel
                         )
-                        val isDarkTheme = when (themePreference) {
-                            ThemePreference.LIGHT -> false
-                            ThemePreference.DARK -> true
-                            ThemePreference.SYSTEM_DEFAULT -> isSystemInDarkTheme()
-                        }
-                        val viewModel: MainViewModel = viewModel()
-                        val navController = rememberNavController()
-                        AttendEaseTheme(
-                            darkTheme = isDarkTheme,
-                            dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && storedColor == null,
-                            selectedColor = storedColor
-                        ) {
-                            AppNavGraph(
-                                navController = navController,
-                                userName = name,
-                                selectedColor = storedColor,
-                                subjectViewModel = subjectViewModel,
-                                detailViewModel = detailViewModel,
-                                timetableViewModel = timeTableViewModel,
-                                mainViewModel = viewModel,
-                                paymentViewModel = paymentViewModel
-                            )
-                        }
                     }
                 }
             }

@@ -10,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,6 +75,7 @@ import com.example.attendease.UserPreferences
 import com.example.attendease.dailogbox.DeleteDialog
 import com.example.attendease.model.SubjectViewModel
 import com.example.attendease.model.TimetableViewModel
+import com.example.attendease.ui.theme.ThemePreference
 import com.example.attendease.ui.theme.nothingFontFamily
 import com.example.attendease.ui.theme.roundFontFamily
 import com.example.attendease.uicomponent.NotificationToggle
@@ -84,10 +87,10 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SettingsScreen(
-    selectedColor: Int?,
     navController: NavController = rememberNavController(),
     viewModel: SubjectViewModel,
-    viewModel4: TimetableViewModel
+    viewModel4: TimetableViewModel,
+    userPreference: UserPreferences
 ) {
     val screen = listOf(
         Screen.Home,
@@ -96,9 +99,15 @@ fun SettingsScreen(
         Screen.Settings
     )
 
+    val themePref by userPreference.themePreferenceFlow.collectAsState(initial = ThemePreference.LIGHT)
+    val isDark = when (themePref) {
+        ThemePreference.DARK -> true
+        ThemePreference.LIGHT -> false
+        ThemePreference.SYSTEM_DEFAULT -> isSystemInDarkTheme()
+    }
+
     val context = LocalContext.current
     val activity = context as Activity
-    val selectColor = selectedColor?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
     val isLava = Build.BRAND.equals("lava", ignoreCase = true)
     val isAndroid12OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
@@ -112,11 +121,7 @@ fun SettingsScreen(
     val contentColor = if (isLava){
         MaterialTheme.colorScheme.onPrimary
     }else {
-        if (isAndroid12OrAbove) {
-            MaterialTheme.colorScheme.primaryContainer
-        } else {
-            selectColor
-        }
+        MaterialTheme.colorScheme.primaryContainer
     }
 
     var isNotificationOn by remember {
@@ -171,7 +176,8 @@ fun SettingsScreen(
                 deleteDialog = false },
             containerColor = contentColor,
             text = "RESET",
-            toast = "ALL RECORDS DELETED!!"
+            toast = "ALL RECORDS DELETED!!",
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
 
@@ -208,7 +214,10 @@ fun SettingsScreen(
                         BottomNavNoAnimation(
                             screens = screen,
                             contentColor,
-                            backgroundColor.copy(alpha = 0.5f),
+                            if(isLava && isDark) MaterialTheme.colorScheme.onPrimaryContainer.copy(0.5f)
+                            else{
+                                if(isDark) MaterialTheme.colorScheme.primary.copy(0.5f)
+                                else backgroundColor.copy(alpha = 0.5f)},
                             navController,
                             3
                         )
@@ -266,7 +275,7 @@ fun SettingsScreen(
                             Text(
                                 text = "NOTIFICATIONS",
                                 fontFamily = nothingFontFamily,
-                                color = if(isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontSize = 18.sp
                             )
                             Spacer(modifier = Modifier.weight(weight = 1f))
@@ -316,8 +325,8 @@ fun SettingsScreen(
                             }else{
                                 NotificationToggle(
                                     contentColor,
-                                    MaterialTheme.colorScheme.tertiary,
-                                    MaterialTheme.colorScheme.tertiary.copy(0.5f),
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.primary.copy(0.5f),
                                     backgroundColor.copy(0.8f),
                                     isSwitchOn = isNotificationOn,
                                     onToggleChange = {
@@ -366,26 +375,17 @@ fun SettingsScreen(
                             Text(
                                 text = "CHANGE THEME",
                                 fontFamily = nothingFontFamily,
-                                color =  if(isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontSize = 18.sp
                             )
-                            if(isAndroid12OrAbove) {
-                                ThemeSwitch(
-                                    contentColor,
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primary.copy(0.5f),
-                                    backgroundColor.copy(0.8f),
-                                    userPreferences = UserPreferences(context)
-                                )
-                            }else{
-                                ThemeSwitch(
-                                    contentColor,
-                                    MaterialTheme.colorScheme.tertiary,
-                                    MaterialTheme.colorScheme.tertiary.copy(0.5f),
-                                    backgroundColor.copy(0.8f),
-                                    userPreferences = UserPreferences(context)
-                                )
-                            }
+                            ThemeSwitch(
+                                contentColor,
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.primary.copy(0.5f),
+                                backgroundColor.copy(0.8f),
+                                userPreferences = UserPreferences(context)
+                            )
+
                         }
                     }
                     Spacer(modifier = Modifier.height(20.dp))
@@ -415,7 +415,7 @@ fun SettingsScreen(
                             Text(
                                 text = "REPORT BUG",
                                 fontFamily = nothingFontFamily,
-                                color = if (isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontSize = 18.sp
                             )
                             IconButton(
@@ -433,7 +433,7 @@ fun SettingsScreen(
                                     painter = painterResource(R.drawable.bug),
                                     contentDescription = "Reset Attendance",
                                     modifier = Modifier.size(36.dp),
-                                    tint = if (isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
@@ -457,7 +457,7 @@ fun SettingsScreen(
                             Text(
                                 text = "SHARE APP",
                                 fontFamily = nothingFontFamily,
-                                color = if (isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontSize = 18.sp
                             )
                             IconButton(
@@ -468,7 +468,7 @@ fun SettingsScreen(
                                     Icons.Default.Share,
                                     contentDescription = "Reset Attendance",
                                     modifier = Modifier.size(36.dp),
-                                    tint = if (isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
@@ -495,7 +495,7 @@ fun SettingsScreen(
                             Text(
                                 text = "RESET APP",
                                 fontFamily = nothingFontFamily,
-                                color = if (isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontSize = 18.sp
                             )
                             IconButton(
@@ -508,7 +508,7 @@ fun SettingsScreen(
                                     Icons.Default.Refresh,
                                     contentDescription = "Reset Attendance",
                                     modifier = Modifier.size(36.dp),
-                                    tint = if (isAndroid12OrAbove) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
+                                    tint = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
@@ -533,7 +533,7 @@ fun SettingsScreen(
                         TypeWriterWithCursor(
                             "IRONHEART PRODUCTION",
                             fontSize = 26,
-                            color = contentColor
+                            color = if(isDark) MaterialTheme.colorScheme.primary else contentColor
                         )
                     }
                 }

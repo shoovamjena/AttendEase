@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,8 +48,13 @@ fun SplashTransition(onAnimationEnd: () -> Unit,backgroundColor:Color,contentCol
     }
 
     if (!isReady) {
-        var dot by remember { mutableStateOf(0) }
-        Box(modifier = Modifier.fillMaxSize().background(backgroundColor), contentAlignment = Alignment.Center,) {
+        var dot by remember { mutableIntStateOf(0) }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(backgroundColor),
+            contentAlignment = Alignment.Center,
+        ) {
             Text(text = "LOADING"+".".repeat(dot), fontSize = 42.sp, fontFamily = nothingFontFamily, fontWeight = FontWeight.Bold, color = contentColor)
             if (transitionColor) {
                 Box(

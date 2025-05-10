@@ -1,5 +1,6 @@
 package com.example.attendease.uicomponent
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -35,6 +36,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
 fun AnimatedBackButton(navController: NavController, color: Color) {
     val scope = rememberCoroutineScope()

@@ -47,9 +47,10 @@ fun TimeTableItem(
     onEdit: () -> Unit,
     onClick: () -> Unit,
     backgroundColor: Color,
-    dialogColor: Color
+    dialogColor: Color,
+    isAndroid12OrAbove: Boolean
 ) {
-    val contentColor = MaterialTheme.colorScheme.secondary
+    val contentColor = MaterialTheme.colorScheme.primary
     var expanded by remember { mutableStateOf(false) }
     var deleteDialog by remember { mutableStateOf(false) }
 
@@ -63,7 +64,8 @@ fun TimeTableItem(
                 expanded = false},
             containerColor = dialogColor,
             text = timetable.subjectName,
-            toast = "${timetable.subjectName} CLASS AT ${timetable.startTime} IS DELETED"
+            toast = "${timetable.subjectName} CLASS AT ${timetable.startTime} IS DELETED",
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
 

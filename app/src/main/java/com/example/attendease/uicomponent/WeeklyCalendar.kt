@@ -43,6 +43,7 @@ import java.util.Locale
 fun Weekly(
     modifier: Modifier = Modifier,
     onDateSelected: (String) -> Unit,
+    color: Color
 ){
 
     val today = remember { LocalDate.now() }
@@ -76,7 +77,8 @@ fun Weekly(
 
     LazyRow(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
     ) {
         items(weekDays) { day ->
             val isSelected = day.date == selectedDate
@@ -105,7 +107,7 @@ fun Weekly(
                 label = "borderColorAnim"
             )
 
-            val textColor = if (isSelected) Color.White else MaterialTheme.colorScheme.primary
+            val textColor = if (isSelected) Color.White else color
 
             Column(
                 modifier = Modifier

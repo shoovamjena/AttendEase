@@ -32,7 +32,7 @@ fun AnimatedAttendanceProgressBar(
         label = "attendanceAnimation"
     )
 
-    val barColor = if (animatedProgress < targetPercentage / 100f) Color(0xFFFF5252) else MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
+    val barColor = if (animatedProgress < targetPercentage / 100f) Color(0xFFFF5252) else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
 
     Box(
         modifier = modifier

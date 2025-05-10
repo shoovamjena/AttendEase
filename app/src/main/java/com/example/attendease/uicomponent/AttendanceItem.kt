@@ -34,7 +34,7 @@ fun AttendanceItem(detail: Attendance) {
             .fillMaxWidth()
             .padding(8.dp)
             .clip(RoundedCornerShape(5.dp))
-            .background(if(isLava){MaterialTheme.colorScheme.onSecondary}else{MaterialTheme.colorScheme.secondaryContainer}),
+            .background(if(isLava){MaterialTheme.colorScheme.onSecondary}else{MaterialTheme.colorScheme.primaryContainer}),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = formattedDate, fontSize = 14.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(horizontal = 8.dp))

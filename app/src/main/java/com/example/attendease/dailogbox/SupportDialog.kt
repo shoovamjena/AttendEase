@@ -40,7 +40,8 @@ fun SupportDialog(
     containerColor: Color,
     title: String,
     amount: Int,
-    lottieCompositionSpec: LottieCompositionSpec
+    lottieCompositionSpec: LottieCompositionSpec,
+    isAndroid12OrAbove: Boolean
 
 ){
     val composition by rememberLottieComposition(lottieCompositionSpec)
@@ -106,7 +107,7 @@ fun SupportDialog(
                         Button(
                             onClick = onConfirm,
                             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary),
-                            modifier = Modifier.shadow(5.dp, shape = RoundedCornerShape(50))
+                            modifier = Modifier.shadow(if(isAndroid12OrAbove)5.dp else 0.dp, shape = RoundedCornerShape(50))
                         ) {
                             Text(text = "PROCEED", color = MaterialTheme.colorScheme.onPrimary, fontFamily = nothingFontFamily)
                         }

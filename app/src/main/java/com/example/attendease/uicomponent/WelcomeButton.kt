@@ -44,7 +44,7 @@ fun WelcomeButton(
                     elevation = 24.dp,
                     shape = RoundedCornerShape(percent = 50),
                     spotColor = shadowColor
-                ) else Modifier // No shadow for Android 11 or below
+                ) else Modifier
             ),
         onClick = onClicked,
         colors = colors) {

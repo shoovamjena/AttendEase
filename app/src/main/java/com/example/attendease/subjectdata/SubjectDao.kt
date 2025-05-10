@@ -43,6 +43,9 @@ interface SubjectDao {
     @Query("UPDATE subject SET attend = attend - 1 WHERE id = :id")
     fun markAbsentAttendance(id: Int)
 
-    @Query("UPDATE subject SET attend = attend -1, total = total -1 WHERE id = :id")
-    fun deleteAttendance(id:Int)
+    @Query("UPDATE subject SET attend = MAX(attend - 1, 0), total = MAX(total - 1, 0) WHERE id = :id")
+    fun deletePresentAttendance(id: Int)
+
+    @Query("UPDATE subject SET total = MAX(total - 1, 0) WHERE id = :id")
+    fun deleteAbsentAttendance(id: Int)
 }

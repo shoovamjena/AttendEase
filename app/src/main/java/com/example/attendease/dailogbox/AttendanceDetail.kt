@@ -37,7 +37,7 @@ import com.example.attendease.uicomponent.AdaptiveText
 import com.example.attendease.uicomponent.AttendanceItem
 
 @Composable
-fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: () -> Unit,backgroundColor: Color,containerColor: Color,navController: NavController) {
+fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: () -> Unit,backgroundColor: Color,containerColor: Color,navController: NavController, isAndroid12OrAbove: Boolean) {
     // Holds attendance records from ViewModel
     val attendanceRecords by viewModel.attendanceRecords.collectAsState()
     Build.BRAND.equals("lava", ignoreCase = true)
@@ -62,6 +62,7 @@ fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: ()
                 horizontalAlignment = Alignment.CenterHorizontally
 
             ) {
+                //Custom Function to Handle Text Size
                 AdaptiveText(subject.name,38,6,10,modifier = Modifier.padding(top = 10.dp, start = 20.dp),
                     nothingFontFamily)
                 Column (
@@ -135,7 +136,7 @@ fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: ()
                     ){
                         Button(
                             onClick = onDismiss,
-                            modifier = Modifier.shadow(5.dp, shape = RoundedCornerShape(50))
+                            modifier = Modifier.shadow(if(isAndroid12OrAbove)5.dp else 0.dp, shape = RoundedCornerShape(50))
                         ) {
                             Text(" CLOSE",
                                 fontFamily = nothingFontFamily)
@@ -144,7 +145,6 @@ fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: ()
                             onClick = {
                                 onDismiss()
                                 navController.navigate("attendanceDetail/${subject.name}")
-
                             },
                         ) {
                             Text(" EDIT",

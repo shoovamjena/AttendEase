@@ -10,11 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +40,7 @@ fun AddSubject(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     containerColor: Color,
+    isAndroid12OrAbove: Boolean
 ){
     Dialog(
         onDismissRequest = onDismiss,
@@ -53,7 +54,7 @@ fun AddSubject(
                 .fillMaxWidth()
                 .padding(16.dp)
                 .background(
-                    color = containerColor.copy(alpha = 1f),
+                    color = containerColor,
                     shape = RoundedCornerShape(16.dp)
                 )
                 .padding(16.dp)
@@ -107,7 +108,8 @@ fun AddSubject(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Button(onClick = onDismiss,
-                        modifier = Modifier.shadow(5.dp, shape = RoundedCornerShape(50))) {
+                        modifier = Modifier.shadow(if(isAndroid12OrAbove)5.dp else 0.dp, shape = RoundedCornerShape(50)),
+                        colors = if (!isAndroid12OrAbove) ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary) else ButtonDefaults.buttonColors()) {
                         Text(text = "Cancel", color = MaterialTheme.colorScheme.onPrimary)
                     }
                     OutlinedButton(onClick = onConfirm) {

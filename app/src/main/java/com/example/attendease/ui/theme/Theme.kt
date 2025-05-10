@@ -17,7 +17,6 @@ enum class ThemePreference {
 fun AttendEaseTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
-    selectedColor: Int? = null,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -29,10 +28,6 @@ fun AttendEaseTheme(
     } catch (e: Exception) {
         null
     }
-    Log.d("ThemeDebug", "Primary Color: ${dynamicScheme?.primary}")
-
-
-    // Function to detect if dynamic primary color is “ugly” or invisible
     fun isWeirdColor(color: Color): Boolean {
         return color.red + color.green + color.blue > 2.5 // too white-ish
     }
@@ -42,25 +37,31 @@ fun AttendEaseTheme(
             dynamicScheme
         }
 
-        selectedColor != null -> {
+        !darkTheme -> {
             lightColorScheme(
-                primary = Color(selectedColor),
-                secondary = Color(selectedColor),
+                tertiaryContainer = Color(0xffbfe9f9),
+                tertiary = Color(0xFFb2dcec),
+                primary = Color(0xFF00492c),
+                primaryContainer = Color(0xFFA4E1BF),
+                secondary = Color(0xFF2F4337),
+                secondaryContainer = Color(0xFFA4E1BF),
                 onPrimary = Color.White,
                 onSecondary = Color.White,
                 surface = Color.White,
                 onSurface = Color.Black
             )
         }
-
         else -> {
-            lightColorScheme(
-                primary = Color(0xFF6750A4), // your old purple
-                secondary = Color(0xFF625B71),
-                tertiary = Color(0xFF7D5260),
-                onPrimary = Color.White,
-                surface = Color.White,
-                onSurface = Color.Black
+            darkColorScheme(
+                tertiaryContainer = Color(0xff234c59),
+                tertiary= Color(0xFFb2dcec),
+                primary =Color(0xFF88BFA0),
+                primaryContainer = Color(0xFF2F4337),
+                secondaryContainer = Color(0xFF88BFA0),
+                onPrimary = Color.Black,
+                onSecondary = Color.Black,
+                surface = Color(0xFF121212),
+                onSurface = Color.White
             )
         }
     }

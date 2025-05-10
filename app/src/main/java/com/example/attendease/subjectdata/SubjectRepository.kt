@@ -42,8 +42,12 @@ class SubjectRepository(private val subjectDao: SubjectDao) {
         subjectDao.markAbsentAttendance(id)
     }
 
-    fun deleteAttendance(id: Int){
-        subjectDao.deleteAttendance(id)
+    fun deletePresentAttendance(id: Int){
+        subjectDao.deletePresentAttendance(id)
+    }
+
+    fun deleteAbsentAttendance(id: Int){
+        subjectDao.deleteAbsentAttendance(id)
     }
 
 }

@@ -45,7 +45,8 @@ fun DeleteDialog(
     onConfirm: () -> Unit,
     containerColor: Color,
     text: String,
-    toast: String
+    toast: String,
+    isAndroid12OrAbove: Boolean
 ){
     val context = LocalContext.current
     var playAnimation by remember { mutableStateOf(false) }
@@ -138,7 +139,7 @@ fun DeleteDialog(
                         Button(
                             onClick = { playAnimation = true },
                             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error),
-                            modifier = Modifier.shadow(5.dp, shape = RoundedCornerShape(50))
+                            modifier = Modifier.shadow(if(isAndroid12OrAbove)5.dp else 0.dp, shape = RoundedCornerShape(50))
                         ) {
                             Text(text = "CONFIRM", color = MaterialTheme.colorScheme.onPrimary, fontFamily = nothingFontFamily)
                         }

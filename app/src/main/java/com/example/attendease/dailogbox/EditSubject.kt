@@ -31,13 +31,14 @@ import com.example.attendease.ui.theme.nothingFontFamily
 fun EditSubject(
     subName: String,
     onSubNameChange: (String) -> Unit,
-    classesAtended: String,
+    classesAttended: String,
     onClassesAttendChange: (String) ->Unit,
     totalClasses: String,
     onTotalClassesChange: (String) -> Unit,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    containerColor: Color
+    containerColor: Color,
+    isAndroid12OrAbove: Boolean
 ){
 
     Dialog(
@@ -83,7 +84,7 @@ fun EditSubject(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 10.dp),
-                    value = classesAtended,
+                    value = classesAttended,
                     onValueChange = onClassesAttendChange,
                     label = { Text(text ="Classes Attended") },
                     placeholder = { Text(text="Enter number of classes attended", fontSize = 11.sp) },
@@ -98,7 +99,7 @@ fun EditSubject(
                     label = { Text(text ="Total Classes") },
                     placeholder = { Text(text="Enter total number of classes", fontSize = 11.sp) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    isError = totalClasses<classesAtended
+                    isError = totalClasses<classesAttended
                 )
 
                 Row(
@@ -106,7 +107,7 @@ fun EditSubject(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Button(onClick = onDismiss,
-                        modifier = Modifier.shadow(5.dp, shape = RoundedCornerShape(50))) {
+                        modifier = Modifier.shadow(if(isAndroid12OrAbove)5.dp else 0.dp, shape = RoundedCornerShape(50))) {
                         Text(text = "CANCEL", color = MaterialTheme.colorScheme.onPrimary, fontFamily = nothingFontFamily)
                     }
                     OutlinedButton(onClick = {

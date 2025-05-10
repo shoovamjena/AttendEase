@@ -5,8 +5,10 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,12 +57,14 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.attendease.R
+import com.example.attendease.UserPreferences
 import com.example.attendease.dailogbox.NoInternetDialog
 import com.example.attendease.dailogbox.PaymentFailureDialog
 import com.example.attendease.dailogbox.PaymentSuccessDialog
 import com.example.attendease.dailogbox.SupportDialog
 import com.example.attendease.model.PaymentViewModel
 import com.example.attendease.payment.PaymentState
+import com.example.attendease.ui.theme.ThemePreference
 import com.example.attendease.ui.theme.nothingFontFamily
 import com.example.attendease.ui.theme.roundFontFamily
 import com.example.attendease.uicomponent.SupportItem
@@ -82,10 +86,18 @@ fun isInternetAvailable(context: Context): Boolean {
 @Composable
 fun DonateScreen(
     userName: String,
-    selectedColor: Int?,
     navController: NavController = rememberNavController(),
-    viewModel: PaymentViewModel
+    viewModel: PaymentViewModel,
+    userPreference: UserPreferences
 ) {
+
+    val themePref by userPreference.themePreferenceFlow.collectAsState(initial = ThemePreference.LIGHT)
+    val isDark = when (themePref) {
+        ThemePreference.DARK -> true
+        ThemePreference.LIGHT -> false
+        ThemePreference.SYSTEM_DEFAULT -> isSystemInDarkTheme()
+    }
+
     val context = LocalContext.current
     var donateDialog by remember { mutableStateOf(false) }
     var showNoInternetDialog by remember { mutableStateOf(false) }
@@ -101,7 +113,6 @@ fun DonateScreen(
 
     val paymentState by viewModel.paymentState.collectAsState()
 
-    val selectColor = selectedColor?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
     val isLava = Build.BRAND.equals("lava", ignoreCase = true)
     val isAndroid12OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
@@ -114,11 +125,7 @@ fun DonateScreen(
     val contentColor = if (isLava){
         MaterialTheme.colorScheme.onPrimary
     }else {
-        if (isAndroid12OrAbove) {
-            MaterialTheme.colorScheme.primaryContainer
-        } else {
-            selectColor
-        }
+        MaterialTheme.colorScheme.primaryContainer
     }
 
     val screen = listOf(
@@ -162,9 +169,9 @@ fun DonateScreen(
 
     fun processPayment() {
         if (isInternetAvailable(context)) {
+            Toast.makeText(context,"Live Donations will be Activated soon", Toast.LENGTH_LONG).show()
             viewModel.startPayment(context as Activity,selectedAmount,selectedTitle,color=contentColor)
             viewModel.userName = userName
-//            Toast.makeText(context,"Donations will be implemented soon",Toast.LENGTH_LONG).show()
         } else {
             showNoInternetDialog = true
         }
@@ -175,7 +182,8 @@ fun DonateScreen(
             onDismiss = { paymentSuccessDialog = false
                         viewModel.resetPaymentState()},
             cardColor = contentColor,
-            paymentId = paymentId
+            paymentId = paymentId,
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
 
@@ -184,7 +192,8 @@ fun DonateScreen(
             onDismiss = { paymentFailureDialog = false
                         viewModel.resetPaymentState()},
             cardColor = contentColor,
-            errorMessage = errorMessage
+            errorMessage = errorMessage,
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
 
@@ -196,7 +205,8 @@ fun DonateScreen(
                 amount = selectedAmount,
                 lottieCompositionSpec = it,
                 containerColor = contentColor,
-                onConfirm = { processPayment() }
+                onConfirm = { processPayment() },
+                isAndroid12OrAbove = isAndroid12OrAbove
             )
         }
     }
@@ -204,7 +214,8 @@ fun DonateScreen(
     if(showNoInternetDialog){
         NoInternetDialog(
             onDismiss = {showNoInternetDialog = false},
-            cardColor = contentColor
+            cardColor = contentColor,
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
 
@@ -243,7 +254,10 @@ fun DonateScreen(
                         BottomNavNoAnimation(
                             screens = screen,
                             contentColor,
-                            backgroundColor.copy(alpha = 0.5f),
+                            if(isLava && isDark) MaterialTheme.colorScheme.onPrimaryContainer.copy(0.5f)
+                            else{
+                                if(isDark) MaterialTheme.colorScheme.primary.copy(0.5f)
+                                else backgroundColor.copy(alpha = 0.5f)},
                             navController,
                             2
                         )
@@ -309,7 +323,8 @@ fun DonateScreen(
                                 selectedAmount = 49
                                 selectedTitle = " BUY ME A TEA"
                                 donateDialog = true
-                            }
+                            },
+                            isDark = isDark
                         )
                         SupportItem(
                             contentColor = contentColor,
@@ -321,7 +336,8 @@ fun DonateScreen(
                                 selectedAmount = 99
                                 selectedTitle = " BUY ME A COFFEE"
                                 donateDialog = true
-                            }
+                            },
+                            isDark = isDark
                         )
                         SupportItem(
                             contentColor = contentColor,
@@ -333,7 +349,8 @@ fun DonateScreen(
                                 selectedAmount = 199
                                 selectedTitle = " BUY ME A NETFLIX SUB"
                                 donateDialog = true
-                            }
+                            },
+                            isDark = isDark
                         )
                         SupportItem(
                             contentColor = contentColor,
@@ -345,7 +362,21 @@ fun DonateScreen(
                                 selectedAmount = 499
                                 selectedTitle = " BUY ME A TICKET"
                                 donateDialog = true
-                            }
+                            },
+                            isDark = isDark
+                        )
+                        SupportItem(
+                            contentColor = contentColor,
+                            lottieCompositionSpec = LottieCompositionSpec.RawRes(R.raw.gift),
+                            title = "GIFT ME",
+                            amount = 999,
+                            onSelect = {
+                                selectedLottie = LottieCompositionSpec.RawRes(R.raw.gift)
+                                selectedAmount = 999
+                                selectedTitle = "GIFT ME"
+                                donateDialog = true
+                            },
+                            isDark = isDark
                         )
                         Spacer(modifier = Modifier.height(100.dp))
                         Row {
@@ -362,7 +393,7 @@ fun DonateScreen(
                         TypeWriterWithCursor(
                             "IRONHEART PRODUCTION",
                             fontSize = 26,
-                            color = contentColor
+                            color = if(isDark) MaterialTheme.colorScheme.primary else contentColor
                         )
                     }
                 }

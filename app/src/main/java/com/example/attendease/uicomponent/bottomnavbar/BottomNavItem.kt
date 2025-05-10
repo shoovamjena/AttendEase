@@ -4,7 +4,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,15 +37,22 @@ fun BottomNavItem(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        val animatedHeight by animateDpAsState(targetValue = if (isSelected) 36.dp else 26.dp)
-        val animatedElevation by animateDpAsState(targetValue = if (isSelected) 15.dp else 0.dp)
-        val animatedAlpha by animateFloatAsState(targetValue = if (isSelected) 1f else .5f)
+        val animatedHeight by animateDpAsState(targetValue = if (isSelected) 36.dp else 26.dp,
+            label = ""
+        )
+        val animatedElevation by animateDpAsState(targetValue = if (isSelected) 15.dp else 0.dp,
+            label = ""
+        )
+        val animatedAlpha by animateFloatAsState(targetValue = if (isSelected) 1f else .5f,
+            label = ""
+        )
         val animatedIconSize by animateDpAsState(
             targetValue = if (isSelected) 26.dp else 20.dp,
             animationSpec = spring(
                 stiffness = Spring.StiffnessVeryLow,
                 dampingRatio = Spring.DampingRatioLowBouncy,
             ),
+            label = "",
         )
         Row(
             modifier = Modifier

@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.PowerManager
-import android.util.Log
 import com.example.attendease.UserPreferences
 import com.example.attendease.subjectdata.SubjectDatabase
 import com.example.attendease.timetabledata.TimetableDatabase
@@ -20,7 +19,6 @@ import java.util.Locale
 
 class ClassCheckerReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d("ClassCheckReceiver", "Checking for upcoming classes (fallback mode)")
 
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         val wakeLock = powerManager.newWakeLock(
@@ -49,34 +47,26 @@ class ClassCheckerReceiver : BroadcastReceiver() {
                 val currentTimeParsed = LocalTime.now()
 
                 for (timetableEntry in classesForToday) {
-                    try {
-                        val classTimeParsed = LocalTime.parse(timetableEntry.startTime, formatter)
-                        val diffInMinutes = ChronoUnit.MINUTES.between(currentTimeParsed, classTimeParsed)
+                    val classTimeParsed = LocalTime.parse(timetableEntry.startTime, formatter)
+                    val diffInMinutes = ChronoUnit.MINUTES.between(currentTimeParsed, classTimeParsed)
 
-                        Log.d("ClassCheckReceiver", "Class: ${timetableEntry.subjectName}, Diff: $diffInMinutes mins")
 
-                        // Check if class is within 15-30 minutes
-                        if (diffInMinutes in 15..30) {
-                            val subject = allSubjects.find { it.name == timetableEntry.subjectName }
+                    // Check if class is within 1-30 minutes
+                    if (diffInMinutes in 1..30) {
+                        val subject = allSubjects.find { it.name == timetableEntry.subjectName }
 
-                            if (subject != null) {
-                                val notificationHelper = NotificationHelper(context)
-                                notificationHelper.showClassNotification(
-                                    classId = timetableEntry.Id,
-                                    subjectName = subject.name,
-                                    startTime = timetableEntry.startTime,
-                                    attendancePercentage = subject.attendancePercentage,
-                                    targetPercentage = targetAttendance
-                                )
-                                Log.d("ClassCheckReceiver", "Notification shown for ${subject.name}")
-                            }
+                        if (subject != null) {
+                            val notificationHelper = NotificationHelper(context)
+                            notificationHelper.showClassNotification(
+                                classId = timetableEntry.id,
+                                subjectName = subject.name,
+                                startTime = timetableEntry.startTime,
+                                attendancePercentage = subject.attendancePercentage,
+                                targetPercentage = targetAttendance
+                            )
                         }
-                    } catch (e: Exception) {
-                        Log.e("ClassCheckReceiver", "Error processing class", e)
                     }
                 }
-            } catch (e: Exception) {
-                Log.e("ClassCheckReceiver", "Failed to check classes", e)
             } finally {
                 if (wakeLock.isHeld) {
                     wakeLock.release()

@@ -40,7 +40,8 @@ import com.example.attendease.ui.theme.roundFontFamily
 fun PaymentSuccessDialog(
     onDismiss: () -> Unit,
     cardColor: Color,
-    paymentId: String
+    paymentId: String,
+    isAndroid12OrAbove: Boolean
 ){
     Dialog(
         onDismissRequest = onDismiss,
@@ -53,7 +54,7 @@ fun PaymentSuccessDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .shadow(5.dp, shape = RoundedCornerShape(16.dp))
+                .shadow(if(isAndroid12OrAbove)5.dp else 0.dp, shape = RoundedCornerShape(16.dp))
                 .clip(RoundedCornerShape(16.dp))
                 .background(cardColor),
         ) {
@@ -72,16 +73,16 @@ fun PaymentSuccessDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // No Internet Lottie Animation
-                val noInternetComposition by rememberLottieComposition(
+                // Payment Success Lottie Animation
+                val paymentSuccessComposition by rememberLottieComposition(
                     spec = LottieCompositionSpec.RawRes(R.raw.paymentsuccess)
                 )
-                val noInternetAnimatable = rememberLottieAnimatable()
+                val paymentSuccessAnimation = rememberLottieAnimatable()
 
-                LaunchedEffect(noInternetComposition) {
-                    if (noInternetComposition != null) {
-                        noInternetAnimatable.animate(
-                            composition = noInternetComposition,
+                LaunchedEffect(paymentSuccessComposition) {
+                    if (paymentSuccessComposition != null) {
+                        paymentSuccessAnimation.animate(
+                            composition = paymentSuccessComposition,
                             iterations = LottieConstants.IterateForever,
                         )
                     }
@@ -93,8 +94,8 @@ fun PaymentSuccessDialog(
                     contentAlignment = Alignment.Center
                 ) {
                     LottieAnimation(
-                        composition = noInternetComposition,
-                        progress = { noInternetAnimatable.progress },
+                        composition = paymentSuccessComposition,
+                        progress = { paymentSuccessAnimation.progress },
                         modifier = Modifier.size(300.dp)
                     )
                 }
@@ -119,7 +120,7 @@ fun PaymentSuccessDialog(
                 Button(
                     onClick= onDismiss,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
-                        .shadow(5.dp, shape = RoundedCornerShape(50)),
+                        .shadow(if(isAndroid12OrAbove)5.dp else 0.dp, shape = RoundedCornerShape(50)),
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
                 ) {
                     Text("CLOSE",

@@ -31,7 +31,8 @@ fun ChangeTargetDialog(
     currentTarget: Float,
     onDismiss: () -> Unit,
     onConfirm: (Int) -> Unit,
-    contentColor: Color
+    contentColor: Color,
+    isAndroid12OrAbove: Boolean
 ) {
     var sliderValue by remember { mutableFloatStateOf(currentTarget) }
     var editTextValue by remember { mutableStateOf(currentTarget.toString()) }
@@ -82,7 +83,7 @@ fun ChangeTargetDialog(
         dismissButton = {
             Button(onClick = onDismiss,
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error),
-                modifier = Modifier.shadow(5.dp, shape = RoundedCornerShape(50))){
+                modifier = Modifier.shadow(if(isAndroid12OrAbove)5.dp else 0.dp, shape = RoundedCornerShape(50))){
                 Text("CANCEL",fontFamily = nothingFontFamily, textAlign = TextAlign.Center)
             }
         }

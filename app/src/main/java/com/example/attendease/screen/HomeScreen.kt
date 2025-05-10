@@ -1,5 +1,3 @@
-@file:Suppress("NAME_SHADOWING")
-
 package com.example.attendease.screen
 
 import android.os.Build
@@ -27,7 +25,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.DropdownMenu
@@ -58,7 +55,6 @@ import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -90,7 +86,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     userName: String,
-    selectedColor: Int?,
     viewModel: SubjectViewModel,
     viewModel2: DetailViewModel,
     viewModel3: MainViewModel,
@@ -127,23 +122,17 @@ fun HomeScreen(
     var text by remember { mutableStateOf("") }
     var total by remember { mutableStateOf("") }
     var attend by remember { mutableStateOf("") }
-    val selectColor = selectedColor?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
     val isAndroid12OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    var showColorScreen by remember { mutableStateOf(false) }
     val backgroundColor = if(isLava){
         if(isDark)
         MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
     }else {
-        if(isDark)MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onPrimary
+        if(isDark)MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onPrimary
     }
     val contentColor = if (isLava){
         MaterialTheme.colorScheme.onPrimary
     }else {
-        if (isAndroid12OrAbove) {
-            MaterialTheme.colorScheme.primaryContainer
-        } else {
-            selectColor
-        }
+        MaterialTheme.colorScheme.primaryContainer
     }
 
     var expanded by remember { mutableStateOf(false) }
@@ -191,7 +180,8 @@ fun HomeScreen(
                 }
 
             },
-            containerColor = contentColor
+            containerColor = contentColor,
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
 
@@ -199,7 +189,7 @@ fun HomeScreen(
         EditSubject(
             subName = text,
             onSubNameChange = { text = it.uppercase() },
-            classesAtended = attend,
+            classesAttended = attend,
             onClassesAttendChange = { attend = it },
             totalClasses = total,
             onTotalClassesChange = { total = it },
@@ -242,8 +232,8 @@ fun HomeScreen(
                 }
 
             },
-            contentColor
-
+            contentColor,
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
 
@@ -258,20 +248,11 @@ fun HomeScreen(
                     userPreferences.saveTarget(context,newTarget.toFloat())
                 }
                 showChangeTargetDialog = false
-            }
+            },
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
 
-    if (showColorScreen) {
-        ChangeColorDialog(
-            onDismiss = { showColorScreen = false },
-            onColourSelected = { selectedColor ->
-                coroutineScope.launch {
-                    userPreferences.saveThemeColor(selectedColor.toArgb())
-                }
-            },
-        )
-    }
     if (resetDialog){
         ResetDialog(
             onConfirm = {
@@ -282,14 +263,15 @@ fun HomeScreen(
                 resetDialog = false
                 expanded = false},
             containerColor = contentColor,
-            toast = "ALL RECORDS DELETED!!"
+            toast = "ALL RECORDS DELETED!!",
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
     if (!viewModel3.hasSplashPlayed) {
         SplashTransition(
             onAnimationEnd = {
                 viewModel3.hasSplashPlayed = true
-            }, backgroundColor,if(isDark)MaterialTheme.colorScheme.primary else contentColor
+            }, backgroundColor,contentColor
         )
     } else {
         var isReady by remember { mutableStateOf(false) }
@@ -300,7 +282,7 @@ fun HomeScreen(
         if (!isReady) {
             Box(modifier = Modifier
                 .fillMaxSize()
-                .background(if(isDark)MaterialTheme.colorScheme.primary else contentColor), contentAlignment = Alignment.Center) {}
+                .background(contentColor), contentAlignment = Alignment.Center) {}
         }
         else {
             Scaffold(
@@ -333,7 +315,7 @@ fun HomeScreen(
                                 contentColor,
                                 if(isLava && isDark) MaterialTheme.colorScheme.onPrimaryContainer.copy(0.5f)
                                 else{
-                                    if(isDark) MaterialTheme.colorScheme.onPrimary.copy(0.5f)
+                                    if(isDark) MaterialTheme.colorScheme.primary.copy(0.5f)
                                     else backgroundColor.copy(alpha = 0.5f)},
                                 navController,
                                 0
@@ -388,7 +370,7 @@ fun HomeScreen(
                             ) {
                                 Text(
                                     text = "Hello",
-                                    color = MaterialTheme.colorScheme.primary,
+                                    color =MaterialTheme.colorScheme.primary,
                                     fontSize = 28.sp,
                                     fontFamily = nothingFontFamily,
                                     fontWeight = FontWeight.ExtraBold,
@@ -413,7 +395,7 @@ fun HomeScreen(
                                         IconButton(
                                             onClick = { expanded = true },
                                             colors = IconButtonDefaults.iconButtonColors(
-                                                contentColor
+                                                if(!isDark) contentColor else MaterialTheme.colorScheme.primary.copy(0.7f)
                                             ),
                                             modifier = Modifier.size(32.dp)
                                         ) {
@@ -429,27 +411,6 @@ fun HomeScreen(
                                             modifier = Modifier
                                                 .background(backgroundColor.copy(alpha = 0.5f))
                                         ) {
-                                            if (!isAndroid12OrAbove) {
-                                                DropdownMenuItem(
-                                                    text = {
-                                                        Text(
-                                                            text = "Change Theme",
-                                                            fontSize = 14.sp
-                                                        )
-                                                    },
-                                                    leadingIcon = {
-                                                        Icon(
-                                                            Icons.Default.Edit,
-                                                            contentDescription = "Theme",
-                                                            modifier = Modifier.size(22.dp)
-                                                        )
-                                                    },
-                                                    onClick = {
-                                                        showColorScreen = true
-                                                        expanded = false
-                                                    },
-                                                )
-                                            }
                                             DropdownMenuItem(
                                                 text = {
                                                     Text(
@@ -500,7 +461,7 @@ fun HomeScreen(
                             TimeBasedGreeting()
                             Text(
                                 text = "Let's Keep Your Attendance on Point!",
-                                color = MaterialTheme.colorScheme.secondary, // Lighter color
+                                color = MaterialTheme.colorScheme.primary,
                                 fontSize = 12.sp,
                                 fontFamily = roundFontFamily,
                                 fontWeight = FontWeight.Normal,
@@ -509,7 +470,7 @@ fun HomeScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .heightIn(min = 500.dp)// Height based on content
+                                    .heightIn(min = 400.dp, max = 650.dp)
                                     .padding(top = 25.dp, bottom = 30.dp)
                                     .shadow(10.dp, shape = RoundedCornerShape(20.dp))
                                     .clip(
@@ -561,7 +522,7 @@ fun HomeScreen(
                                                 attendanceDialog = true
                                             },
                                             viewModel = viewModel2,
-                                            backgroundColor = if(isDark && !isLava)MaterialTheme.colorScheme.tertiaryContainer else backgroundColor,
+                                            backgroundColor = backgroundColor,
                                             dialogColor = contentColor
                                         )
                                     }
@@ -575,7 +536,8 @@ fun HomeScreen(
                                             attendanceDialog = false },
                                         contentColor,
                                         backgroundColor,
-                                        navController
+                                        navController,
+                                        isAndroid12OrAbove = isAndroid12OrAbove
                                     )
                                 }
                                 Box(
@@ -628,11 +590,7 @@ fun HomeScreen(
                                 IconButton(
                                     onClick = { addSubjectDialog = true },
                                     colors = IconButtonDefaults.iconButtonColors(
-                                        containerColor = if (isAndroid12OrAbove) {
-                                            MaterialTheme.colorScheme.onTertiary
-                                        } else {
-                                            Color.White.copy(alpha = 0.8f)
-                                        }
+                                        containerColor = if(isDark) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.tertiaryContainer
                                     ),
                                     modifier = Modifier
                                         .padding(10.dp)
@@ -649,11 +607,7 @@ fun HomeScreen(
                                     Icon(
                                         imageVector = Icons.Default.Add,
                                         contentDescription = "Add Subject",
-                                        tint = if (isAndroid12OrAbove) {
-                                            MaterialTheme.colorScheme.secondary
-                                        } else {
-                                            selectColor
-                                        },
+                                        tint = if(isDark) Color.White else MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(46.dp)
                                     )
                                 }

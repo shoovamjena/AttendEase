@@ -38,14 +38,15 @@ import com.example.attendease.ui.theme.roundFontFamily
 @Composable
 fun NoInternetDialog(
     onDismiss: () -> Unit,
-    cardColor: Color
+    cardColor: Color,
+    isAndroid12OrAbove: Boolean
 ){
     Dialog(onDismissRequest = onDismiss) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
-                .shadow(5.dp, shape = RoundedCornerShape(16.dp))
+                .shadow(if(isAndroid12OrAbove)5.dp else 0.dp, shape = RoundedCornerShape(16.dp))
                 .clip(RoundedCornerShape(16.dp))
                 .background(cardColor),
         ) {
@@ -68,11 +69,11 @@ fun NoInternetDialog(
                 val noInternetComposition by rememberLottieComposition(
                     spec = LottieCompositionSpec.RawRes(R.raw.nointernet)
                 )
-                val noInternetAnimatable = rememberLottieAnimatable()
+                val noInternetAnimation = rememberLottieAnimatable()
 
                 LaunchedEffect(noInternetComposition) {
                     if (noInternetComposition != null) {
-                        noInternetAnimatable.animate(
+                        noInternetAnimation.animate(
                             composition = noInternetComposition,
                             iterations = LottieConstants.IterateForever,
                         )
@@ -86,7 +87,7 @@ fun NoInternetDialog(
                 ) {
                     LottieAnimation(
                         composition = noInternetComposition,
-                        progress = { noInternetAnimatable.progress },
+                        progress = { noInternetAnimation.progress },
                         modifier = Modifier.size(100.dp)
                     )
                 }
@@ -104,7 +105,7 @@ fun NoInternetDialog(
                     Button(
                         onClick= onDismiss,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
-                            .shadow(5.dp, shape = RoundedCornerShape(50)),
+                            .shadow(if(isAndroid12OrAbove)5.dp else 0.dp, shape = RoundedCornerShape(50)),
                         colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
                     ) {
                         Text("TRY AGAIN",

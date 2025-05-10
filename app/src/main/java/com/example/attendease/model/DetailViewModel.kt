@@ -39,10 +39,14 @@ class DetailViewModel(private val repository: AttendanceRepository,private  val 
         }
     }
 
-    fun deleteDetail(attendId: Int,subjectId: Int){
+    fun deleteDetail(attendId: Int,subjectId: Int,status: String){
         viewModelScope.launch (Dispatchers.IO){
             repository.deleteDetail(attendId)
-            subjectRepository.deleteAttendance(subjectId)
+            if(status == "Present"){
+                subjectRepository.deletePresentAttendance(subjectId)
+            }else{
+                subjectRepository.deleteAbsentAttendance(subjectId)
+            }
         }
     }
 

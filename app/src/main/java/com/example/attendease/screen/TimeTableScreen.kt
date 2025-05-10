@@ -78,7 +78,6 @@ import java.util.Locale
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun TimeTableScreen(
-    selectedColor: Int?,
     navController: NavController = rememberNavController(),
     timeViewModel: TimetableViewModel,
     subjectViewModel: SubjectViewModel,
@@ -100,7 +99,6 @@ fun TimeTableScreen(
         Screen.Settings
     )
 
-    val selectColor = selectedColor?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
     val isLava = Build.BRAND.equals("lava", ignoreCase = true)
     val isAndroid12OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
@@ -108,16 +106,12 @@ fun TimeTableScreen(
         if(isDark)
             MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
     }else {
-        if(isDark)MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.onPrimary
+        if(isDark)MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onPrimary
     }
     val contentColor = if (isLava){
         MaterialTheme.colorScheme.onPrimary
     }else {
-        if (isAndroid12OrAbove) {
-            MaterialTheme.colorScheme.primaryContainer
-        } else {
-            selectColor
-        }
+        MaterialTheme.colorScheme.primaryContainer
     }
     var selectedDay by remember { mutableStateOf("") }
     var isReady by remember { mutableStateOf(false) }
@@ -175,7 +169,8 @@ fun TimeTableScreen(
 
             },
             containerColor = contentColor,
-            viewModel = subjectViewModel
+            viewModel = subjectViewModel,
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
     if (editClassDialog && selectedClass !=null) {
@@ -199,7 +194,7 @@ fun TimeTableScreen(
                 if(subName.isNotEmpty() && start.isBefore(end)){
                     selectedClass?.let { timetable ->
                         timeViewModel.updateClass(
-                            id = timetable.Id,
+                            id = timetable.id,
                             className = subName,
                             day = selectedDay,
                             startTime = firstTime,
@@ -217,7 +212,8 @@ fun TimeTableScreen(
 
             },
             containerColor = contentColor,
-            viewModel = subjectViewModel
+            viewModel = subjectViewModel,
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
 
@@ -255,7 +251,7 @@ fun TimeTableScreen(
                             contentColor,
                             if(isLava && isDark) MaterialTheme.colorScheme.onPrimaryContainer.copy(0.5f)
                             else{
-                                if(isDark) MaterialTheme.colorScheme.onPrimary.copy(0.5f)
+                                if(isDark) MaterialTheme.colorScheme.primary.copy(0.5f)
                                 else backgroundColor.copy(alpha = 0.5f)},
                             navController,
                             1
@@ -304,6 +300,7 @@ fun TimeTableScreen(
                                 val fullDay = timeViewModel.getFullDay(day.uppercase())
                                 timeViewModel.setSelectedDay(fullDay)
                             },
+                            color = MaterialTheme.colorScheme.primary
                         )
 
                         Box(
@@ -343,9 +340,10 @@ fun TimeTableScreen(
                                                 endTime = item.endTime
                                                 editClassDialog = true
                                             },
-                                            onClick = { /* TODO: Navigate to detail screen or show bottom sheet */ },
-                                            backgroundColor = if(isDark && !isLava)MaterialTheme.colorScheme.tertiaryContainer else backgroundColor,
-                                            contentColor
+                                            onClick = {navController.navigate("attendanceDetail/${item.subjectName}") },
+                                            backgroundColor = backgroundColor,
+                                            contentColor,
+                                            isAndroid12OrAbove = isAndroid12OrAbove
                                         )
                                     }
                                 }
@@ -368,8 +366,6 @@ fun TimeTableScreen(
                                                     end = Offset(0f, 0f)
                                                 )
                                             )
-
-
                                         }
                                     }
                             ) { }
@@ -391,8 +387,6 @@ fun TimeTableScreen(
                                                     end = Offset(0f, 0f)
                                                 )
                                             )
-
-
                                         }
                                     }
                             ) { }
@@ -400,11 +394,7 @@ fun TimeTableScreen(
                             IconButton(
                                 onClick = { addClassDialog=true },
                                 colors = IconButtonDefaults.iconButtonColors(
-                                    containerColor = if (isAndroid12OrAbove) {
-                                        MaterialTheme.colorScheme.onTertiary
-                                    } else {
-                                        Color.White.copy(alpha = 0.8f)
-                                    }
+                                    containerColor =  if(isDark) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.tertiaryContainer
                                 ),
                                 modifier = Modifier
                                     .padding(20.dp)
@@ -421,11 +411,7 @@ fun TimeTableScreen(
                                 Icon(
                                     imageVector = Icons.Default.Add,
                                     contentDescription = "Add Subject",
-                                    tint = if (isAndroid12OrAbove) {
-                                        MaterialTheme.colorScheme.secondary
-                                    } else {
-                                        selectColor
-                                    },
+                                    tint = if(isDark) Color.White else MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(46.dp)
                                 )
                             }

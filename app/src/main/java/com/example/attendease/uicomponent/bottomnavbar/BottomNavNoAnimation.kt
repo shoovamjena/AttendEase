@@ -21,7 +21,7 @@ fun BottomNavNoAnimation(
     navController: NavController,
     currentScreen: Int
 ) {
-    var selectedScreen by remember { mutableStateOf(currentScreen) }
+    var selectedScreen by remember { mutableIntStateOf(currentScreen) }
 
     Box(
         Modifier
@@ -39,7 +39,7 @@ fun BottomNavNoAnimation(
                 val isSelected = index == selectedScreen
 
                 val animatedWeight by animateFloatAsState(
-                    targetValue = if (isSelected) 1.5f else 1f
+                    targetValue = if (isSelected) 1.5f else 1f, label = ""
                 )
 
                 val interactionSource = remember { MutableInteractionSource() }

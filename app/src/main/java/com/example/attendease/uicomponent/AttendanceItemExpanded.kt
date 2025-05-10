@@ -39,7 +39,7 @@ import java.util.Locale
 fun AttendanceItemDetailed(
     detail: Attendance,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
 ) {
     val isLava = Build.BRAND.equals("lava", ignoreCase = true)
     val formattedDate = remember(detail.dateTime) {
@@ -59,7 +59,7 @@ fun AttendanceItemDetailed(
                 modifier = Modifier.fillMaxWidth()
                     .heightIn(min = 65.dp)
                     .clip(RoundedCornerShape(50))
-                    .background(if(isLava){MaterialTheme.colorScheme.onSecondary}else{MaterialTheme.colorScheme.secondaryContainer}),
+                    .background(if(isLava){MaterialTheme.colorScheme.onSecondary}else{MaterialTheme.colorScheme.primaryContainer}),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ){
@@ -76,7 +76,7 @@ fun AttendanceItemDetailed(
                     .widthIn(min = 100.dp , max = 130.dp)
                     .align(Alignment.End)
                     .clip(RoundedCornerShape(50))
-                    .background(if(isLava){MaterialTheme.colorScheme.onSecondary.copy(0.7f)}else{MaterialTheme.colorScheme.secondaryContainer.copy(0.7f)}),
+                    .background(if(isLava){MaterialTheme.colorScheme.onSecondary.copy(0.7f)}else{MaterialTheme.colorScheme.primaryContainer.copy(0.7f)}),
             ){
                 Row (
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 10.dp),

@@ -73,7 +73,7 @@ class TimetableViewModel(private val repository: TimetableRepository) : ViewMode
 
     fun updateClass(id: Int, className:String,day: String,startTime: String,endTime: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val item = Timetable(Id=id, subjectName = className, day = day, startTime = startTime, endTime = endTime)
+            val item = Timetable(id=id, subjectName = className, day = day, startTime = startTime, endTime = endTime)
             repository.updateClass(item)
             if (item.day == _selectedDay.value) {
                 loadClasses(item.day)

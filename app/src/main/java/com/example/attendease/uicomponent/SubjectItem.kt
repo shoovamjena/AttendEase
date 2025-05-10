@@ -70,10 +70,11 @@ fun SubjectItem(
     backgroundColor: Color,
     dialogColor: Color
 ) {
+    val isAndroid12OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val context = LocalContext.current
     val userPreferences = remember { UserPreferences(context) }
     Build.BRAND.equals("lava", ignoreCase = true)
-    val contentColor = MaterialTheme.colorScheme.secondary
+    val contentColor = MaterialTheme.colorScheme.primary
     var expanded by remember { mutableStateOf(false) }
     var deleteDialog by remember { mutableStateOf(false) }
     var resetDialog by remember { mutableStateOf(false) }
@@ -118,7 +119,8 @@ fun SubjectItem(
                 expanded = false},
             containerColor = dialogColor,
             text = subject.name,
-            toast = "${subject.name} IS DELETED!!"
+            toast = "${subject.name} IS DELETED!!",
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
     if (resetDialog){
@@ -130,7 +132,8 @@ fun SubjectItem(
                 resetDialog = false
                 expanded = false},
             containerColor = dialogColor,
-            toast = "${subject.name} is Reset"
+            toast = "${subject.name} is Reset",
+            isAndroid12OrAbove = isAndroid12OrAbove
         )
     }
 
@@ -249,7 +252,7 @@ fun SubjectItem(
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 38.sp,
                             modifier = Modifier.padding(start = 50.dp, top = 10.dp),
-                            color = if (subject.attendancePercentage >= requiredPercentage) MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f) else MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
+                            color = if (subject.attendancePercentage >= requiredPercentage) MaterialTheme.colorScheme.primary.copy(alpha = 0.7f) else MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
                         )
                     }
                 }

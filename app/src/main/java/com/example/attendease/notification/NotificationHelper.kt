@@ -14,7 +14,6 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.PowerManager
 import android.os.SystemClock
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.attendease.R
@@ -43,10 +42,6 @@ class NotificationForegroundService : Service() {
             context.startForegroundService(startServiceIntent)
         }
 
-        fun stopService(context: Context) {
-            val stopServiceIntent = Intent(context, NotificationForegroundService::class.java)
-            context.stopService(stopServiceIntent)
-        }
     }
 
     override fun onCreate() {
@@ -66,7 +61,6 @@ class NotificationForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d("NotificationService", "Foreground service started")
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("AttendEase Active")
@@ -90,10 +84,6 @@ class NotificationForegroundService : Service() {
 
     override fun onBind(intent: Intent?) = null
 
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("NotificationService", "Foreground service destroyed")
-    }
 }
 
 class NotificationHelper(private val context: Context) {
@@ -153,10 +143,7 @@ class NotificationHelper(private val context: Context) {
         NotificationManagerCompat.from(context).apply {
             try {
                 notify(classId, notification)
-                Log.d("NotificationHelper", "High priority notification sent for $subjectName with ID $classId")
-            } catch (e: SecurityException) {
-                Log.e("NotificationHelper", "Permission denied for notifications", e)
-            }
+            } catch (_: SecurityException) {}
         }
     }
 
@@ -169,7 +156,6 @@ class NotificationHelper(private val context: Context) {
 // This receiver handles class notification alarms
 class ClassNotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d("ClassNotificationReceiver", "Alarm received for class notification")
 
         // Acquire wake lock to ensure work completes even if device is in Doze mode
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -198,9 +184,8 @@ class ClassNotificationReceiver : BroadcastReceiver() {
                 targetPercentage = targetPercentage
             )
 
-        } catch (e: Exception) {
-            Log.e("ClassNotificationReceiver", "Failed to process notification", e)
-        } finally {
+        }
+        finally {
             // Release wake lock
             if (wakeLock.isHeld) {
                 wakeLock.release()
@@ -212,7 +197,6 @@ class ClassNotificationReceiver : BroadcastReceiver() {
 // This receiver handles midnight reset alarms
 class MidnightNotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d("MidnightReceiver", "Midnight alarm triggered")
 
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         val wakeLock = powerManager.newWakeLock(
@@ -260,8 +244,6 @@ class MidnightNotificationReceiver : BroadcastReceiver() {
                 // Schedule today's class notifications
                 AlarmScheduler(context).scheduleClassAlarmsForToday()
 
-            } catch (e: Exception) {
-                Log.e("MidnightReceiver", "Failed to process midnight alarm", e)
             } finally {
                 if (wakeLock.isHeld) {
                     wakeLock.release()
@@ -291,9 +273,8 @@ class MidnightNotificationReceiver : BroadcastReceiver() {
 
         NotificationManagerCompat.from(context).apply {
             try {
-                notify(1000, notification) // Special ID for the daily summary
-            } catch (e: SecurityException) {
-                Log.e("MidnightReceiver", "Permission denied for notifications", e)
+                notify(1000, notification)
+            } catch (_: SecurityException) {
             }
         }
     }
@@ -303,7 +284,6 @@ class MidnightNotificationReceiver : BroadcastReceiver() {
 class BootCompletedReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            Log.d("BootReceiver", "Device booted, rescheduling alarms")
 
             // Start foreground service if needed
             NotificationForegroundService.startService(context)
@@ -341,7 +321,6 @@ class AlarmScheduler(private val context: Context) {
     // Call this to schedule all necessary alarms
     fun scheduleAllAlarms() {
         if (!canScheduleExactAlarms()) {
-            Log.w("AlarmScheduler", "Cannot schedule exact alarms - permission not granted")
             // Fallback to inexact alarms or notify user
             scheduleFallbackAlarms()
             return
@@ -373,7 +352,6 @@ class AlarmScheduler(private val context: Context) {
             pendingIntent
         )
 
-        Log.d("AlarmScheduler", "Fallback inexact alarms scheduled")
     }
 
     // Schedules the midnight alarm to reset and plan for next day
@@ -408,7 +386,6 @@ class AlarmScheduler(private val context: Context) {
                     pendingIntent
                 )
             } catch (se: SecurityException) {
-                Log.e("AlarmScheduler", "SecurityException when setting exact alarm", se)
                 // Fall back to inexact alarm
                 alarmManager.set(
                     AlarmManager.RTC_WAKEUP,
@@ -417,9 +394,8 @@ class AlarmScheduler(private val context: Context) {
                 )
             }
 
-            Log.d("AlarmScheduler", "Midnight alarm scheduled for ${calendar.time}")
-        } catch (e: Exception) {
-            Log.e("AlarmScheduler", "Failed to schedule midnight alarm", e)
+
+        } catch (_: Exception) {
         }
     }
 
@@ -460,7 +436,8 @@ class AlarmScheduler(private val context: Context) {
 
                             // If notification time is still in the future
                             if (notificationTime.isAfter(currentTimeParsed)) {
-                                val subject = allSubjects.find { it.name == timetableEntry.subjectName }
+                                val subject =
+                                    allSubjects.find { it.name == timetableEntry.subjectName }
 
                                 if (subject != null) {
                                     // Calculate alarm time
@@ -471,17 +448,23 @@ class AlarmScheduler(private val context: Context) {
                                     calendar.set(Calendar.MILLISECOND, 0)
 
                                     // Create intent with all necessary class data
-                                    val intent = Intent(context, ClassNotificationReceiver::class.java).apply {
-                                        putExtra("classId", timetableEntry.Id)
+                                    val intent = Intent(
+                                        context,
+                                        ClassNotificationReceiver::class.java
+                                    ).apply {
+                                        putExtra("classId", timetableEntry.id)
                                         putExtra("subjectName", subject.name)
                                         putExtra("startTime", timetableEntry.startTime)
-                                        putExtra("attendancePercentage", subject.attendancePercentage)
+                                        putExtra(
+                                            "attendancePercentage",
+                                            subject.attendancePercentage
+                                        )
                                         putExtra("targetPercentage", targetAttendance)
                                     }
 
                                     val pendingIntent = PendingIntent.getBroadcast(
                                         context,
-                                        timetableEntry.Id, // Use class ID as unique request code
+                                        timetableEntry.id, // Use class ID as unique request code
                                         intent,
                                         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                                     )
@@ -493,50 +476,23 @@ class AlarmScheduler(private val context: Context) {
                                             calendar.timeInMillis,
                                             pendingIntent
                                         )
-                                        Log.d("AlarmScheduler", "Exact alarm set for ${subject.name} at ${calendar.time}")
                                     } catch (se: SecurityException) {
-                                        Log.e("AlarmScheduler", "SecurityException when setting class alarm", se)
                                         // Fall back to inexact alarm
                                         alarmManager.set(
                                             AlarmManager.RTC_WAKEUP,
                                             calendar.timeInMillis,
                                             pendingIntent
                                         )
-                                        Log.d("AlarmScheduler", "Inexact alarm set for ${subject.name} at ${calendar.time}")
+
                                     }
                                 }
                             }
                         }
-                    } catch (e: Exception) {
-                        Log.e("AlarmScheduler", "Failed to schedule alarm for ${timetableEntry.subjectName}", e)
+                    } catch (_: Exception) {
                     }
                 }
-            } catch (e: Exception) {
-                Log.e("AlarmScheduler", "Failed to schedule class alarms", e)
+            } catch (_: Exception) {
             }
         }
-    }
-
-    // Cancel all scheduled alarms
-    fun cancelAllAlarms() {
-        // Cancel midnight alarm
-        val midnightIntent = Intent(context, MidnightNotificationReceiver::class.java)
-        val midnightPendingIntent = PendingIntent.getBroadcast(
-            context,
-            1001,
-            midnightIntent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
-        )
-        midnightPendingIntent?.let { alarmManager.cancel(it) }
-
-        // Cancel fallback alarm if it exists
-        val fallbackIntent = Intent(context, ClassCheckerReceiver::class.java)
-        val fallbackPendingIntent = PendingIntent.getBroadcast(
-            context,
-            2000,
-            fallbackIntent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
-        )
-        fallbackPendingIntent?.let { alarmManager.cancel(it) }
     }
 }

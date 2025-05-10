@@ -32,7 +32,8 @@ fun EditAttendanceDialog(
     containerColor: Color,
     onPresent: () -> Unit,
     onAbsent: () -> Unit,
-    status: String
+    status: String,
+    isAndroid12OrAbove: Boolean
 ){
 
 
@@ -63,7 +64,7 @@ fun EditAttendanceDialog(
                         fontFamily = nothingFontFamily,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 24.sp,
-                        color = MaterialTheme.colorScheme.tertiary
+                        color = MaterialTheme.colorScheme.primary
                     )
                     Text(
                         text = "Current Status : $status",
@@ -84,7 +85,7 @@ fun EditAttendanceDialog(
                         Button(
                             onClick = onAbsent,
                             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error.copy(0.8f)),
-                            modifier = Modifier.shadow(5.dp, shape = RoundedCornerShape(50))
+                            modifier = Modifier.shadow(if(isAndroid12OrAbove)5.dp else 0.dp, shape = RoundedCornerShape(50))
                         ) {
                             Text(text = "ABSENT", color = MaterialTheme.colorScheme.onPrimary, fontFamily = nothingFontFamily)
                         }

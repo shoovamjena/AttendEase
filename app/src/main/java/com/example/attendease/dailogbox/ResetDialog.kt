@@ -43,7 +43,8 @@ fun ResetDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     containerColor: Color,
-    toast: String
+    toast: String,
+    isAndroid12OrAbove: Boolean
 ){
     val context = LocalContext.current
     var playAnimation by remember { mutableStateOf(false) }
@@ -128,7 +129,7 @@ fun ResetDialog(
                         Button(
                             onClick = { playAnimation = true },
                             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error),
-                            modifier = Modifier.shadow(5.dp, shape = RoundedCornerShape(50))
+                            modifier = Modifier.shadow(if(isAndroid12OrAbove)5.dp else 0.dp, shape = RoundedCornerShape(50))
                         ) {
                             Text(text = "CONFIRM", color = MaterialTheme.colorScheme.onPrimary, fontFamily = nothingFontFamily)
                         }

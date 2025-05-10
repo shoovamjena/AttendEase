@@ -39,7 +39,8 @@ import com.example.attendease.ui.theme.roundFontFamily
 fun PaymentFailureDialog(
     onDismiss: () -> Unit,
     cardColor: Color,
-    errorMessage: String
+    errorMessage: String,
+    isAndroid12OrAbove: Boolean
 ){
     Dialog(
         onDismissRequest = onDismiss,
@@ -71,16 +72,16 @@ fun PaymentFailureDialog(
                 )
 
 
-                // No Internet Lottie Animation
-                val noInternetComposition by rememberLottieComposition(
+                // Payment Failure Lottie Animation
+                val paymentFailureComposition by rememberLottieComposition(
                     spec = LottieCompositionSpec.RawRes(R.raw.paymentfailure)
                 )
-                val noInternetAnimatable = rememberLottieAnimatable()
+                val paymentFailureAnimation = rememberLottieAnimatable()
 
-                LaunchedEffect(noInternetComposition) {
-                    if (noInternetComposition != null) {
-                        noInternetAnimatable.animate(
-                            composition = noInternetComposition,
+                LaunchedEffect(paymentFailureComposition) {
+                    if (paymentFailureComposition != null) {
+                        paymentFailureAnimation.animate(
+                            composition = paymentFailureComposition,
                             iterations = LottieConstants.IterateForever,
                         )
                     }
@@ -88,8 +89,8 @@ fun PaymentFailureDialog(
 
 
                     LottieAnimation(
-                        composition = noInternetComposition,
-                        progress = { noInternetAnimatable.progress },
+                        composition = paymentFailureComposition,
+                        progress = { paymentFailureAnimation.progress },
                         modifier = Modifier.size(250.dp)
                     )
 
@@ -103,7 +104,7 @@ fun PaymentFailureDialog(
                 Button(
                     onClick= onDismiss,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
-                        .shadow(5.dp, shape = RoundedCornerShape(50)),
+                        .shadow(if(isAndroid12OrAbove)5.dp else 0.dp, shape = RoundedCornerShape(50)),
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
                 ) {
                     Text("TRY AGAIN",

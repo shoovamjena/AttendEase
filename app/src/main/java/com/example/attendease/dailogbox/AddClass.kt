@@ -1,5 +1,6 @@
 package com.example.attendease.dailogbox
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,6 +45,7 @@ import com.example.attendease.model.SubjectViewModel
 import com.example.attendease.ui.theme.nothingFontFamily
 
 
+@SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddClass(
@@ -58,7 +60,8 @@ fun AddClass(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     containerColor: Color,
-    viewModel: SubjectViewModel
+    viewModel: SubjectViewModel,
+    isAndroid12OrAbove: Boolean
 ){
     val startTimePickerState = rememberTimePickerState()
     var startPicker by remember { mutableStateOf(false) }
@@ -297,7 +300,7 @@ fun AddClass(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         Button(onClick = onDismiss,
-                            modifier = Modifier.shadow(5.dp, shape = RoundedCornerShape(50))) {
+                            modifier = Modifier.shadow(if(isAndroid12OrAbove)5.dp else 0.dp, shape = RoundedCornerShape(50))) {
                             Text(text = "Cancel", color = MaterialTheme.colorScheme.onPrimary)
                         }
                         OutlinedButton(onClick = onConfirm) {

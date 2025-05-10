@@ -13,11 +13,11 @@ class AttendanceRepository(
             dateTime = currentTime,
             status = status,
         )
-        attendanceDao.addDetail(attendanceRecord)  // Insert record
+        attendanceDao.addDetail(attendanceRecord)
     }
 
-     fun resetAttendance(subjectId: Int) { // Update subject details
-        attendanceDao.resetAttendance(subjectId)  // Reset attendance
+     fun resetAttendance(subjectId: Int) {
+        attendanceDao.resetAttendance(subjectId)
     }
 
     fun getAttendanceRecords(subjectId: Int): Flow<List<Attendance>> {
