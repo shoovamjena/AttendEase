@@ -1,4 +1,4 @@
-package com.example.attendease.attendancedata
+package com.example.attendease.model.attendancedata
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

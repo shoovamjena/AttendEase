@@ -1,4 +1,4 @@
-package com.example.attendease.attendancedata
+package com.example.attendease.model.attendancedata
 
 import android.content.Context
 import androidx.room.Database
@@ -13,8 +13,8 @@ abstract class AttendanceDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AttendanceDatabase? = null
 
-        fun getAttendanceDatabase(context: Context): AttendanceDatabase{
-            return INSTANCE?: synchronized(this){
+        fun getAttendanceDatabase(context: Context): AttendanceDatabase {
+            return INSTANCE ?: synchronized(this){
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AttendanceDatabase::class.java,

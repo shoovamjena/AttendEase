@@ -29,7 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.attendease.attendancedata.Attendance
+import com.example.attendease.model.attendancedata.Attendance
 import com.example.attendease.ui.theme.nothingFontFamily
 import java.text.SimpleDateFormat
 import java.util.Date

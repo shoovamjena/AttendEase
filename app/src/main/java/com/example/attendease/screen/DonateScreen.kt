@@ -62,7 +62,7 @@ import com.example.attendease.dailogbox.NoInternetDialog
 import com.example.attendease.dailogbox.PaymentFailureDialog
 import com.example.attendease.dailogbox.PaymentSuccessDialog
 import com.example.attendease.dailogbox.SupportDialog
-import com.example.attendease.model.PaymentViewModel
+import com.example.attendease.viewmodel.PaymentViewModel
 import com.example.attendease.payment.PaymentState
 import com.example.attendease.ui.theme.ThemePreference
 import com.example.attendease.ui.theme.nothingFontFamily
@@ -247,7 +247,7 @@ fun DonateScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 10.dp)
-                            .shadow(26.dp)
+                            .shadow(26.dp, shape = RoundedCornerShape(50))
                             .clip(RoundedCornerShape(percent = 50))
                             .background(contentColor.copy(alpha = 0.1f)),
                     ) {

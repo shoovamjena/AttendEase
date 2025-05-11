@@ -1,4 +1,4 @@
-package com.example.attendease.model
+package com.example.attendease.viewmodel
 
 import android.app.Activity
 import androidx.compose.ui.graphics.Color

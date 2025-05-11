@@ -1,4 +1,4 @@
-package com.example.attendease.subjectdata
+package com.example.attendease.model.subjectdata
 
 import android.content.Context
 import androidx.room.Database

@@ -43,7 +43,7 @@ import androidx.navigation.NavController
 import com.example.attendease.UserPreferences
 import com.example.attendease.dailogbox.DeleteDialog
 import com.example.attendease.dailogbox.EditAttendanceDialog
-import com.example.attendease.model.DetailViewModel
+import com.example.attendease.viewmodel.DetailViewModel
 import com.example.attendease.ui.theme.ThemePreference
 import com.example.attendease.ui.theme.coinyFontFamily
 import com.example.attendease.ui.theme.nothingFontFamily

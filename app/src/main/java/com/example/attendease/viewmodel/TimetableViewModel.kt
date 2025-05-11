@@ -1,11 +1,11 @@
-package com.example.attendease.model
+package com.example.attendease.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.attendease.subjectdata.Subject
-import com.example.attendease.timetabledata.Timetable
-import com.example.attendease.timetabledata.TimetableRepository
+import com.example.attendease.model.subjectdata.Subject
+import com.example.attendease.model.timetabledata.Timetable
+import com.example.attendease.model.timetabledata.TimetableRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -73,7 +73,7 @@ class TimetableViewModel(private val repository: TimetableRepository) : ViewMode
 
     fun updateClass(id: Int, className:String,day: String,startTime: String,endTime: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val item = Timetable(id=id, subjectName = className, day = day, startTime = startTime, endTime = endTime)
+            val item = Timetable(Id=id, subjectName = className, day = day, startTime = startTime, endTime = endTime)
             repository.updateClass(item)
             if (item.day == _selectedDay.value) {
                 loadClasses(item.day)

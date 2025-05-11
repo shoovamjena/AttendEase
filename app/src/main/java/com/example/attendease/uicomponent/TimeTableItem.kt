@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.attendease.dailogbox.DeleteDialog
-import com.example.attendease.timetabledata.Timetable
+import com.example.attendease.model.timetabledata.Timetable
 import com.example.attendease.ui.theme.nothingFontFamily
 
 @Composable

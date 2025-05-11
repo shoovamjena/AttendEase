@@ -30,14 +30,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
-import com.example.attendease.model.DetailViewModel
-import com.example.attendease.subjectdata.Subject
+import com.example.attendease.viewmodel.DetailViewModel
+import com.example.attendease.model.subjectdata.Subject
 import com.example.attendease.ui.theme.nothingFontFamily
 import com.example.attendease.uicomponent.AdaptiveText
 import com.example.attendease.uicomponent.AttendanceItem
 
 @Composable
-fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: () -> Unit,backgroundColor: Color,containerColor: Color,navController: NavController, isAndroid12OrAbove: Boolean) {
+fun AttendanceDialog(subject: Subject, viewModel: DetailViewModel, onDismiss: () -> Unit, backgroundColor: Color, containerColor: Color, navController: NavController, isAndroid12OrAbove: Boolean) {
     // Holds attendance records from ViewModel
     val attendanceRecords by viewModel.attendanceRecords.collectAsState()
     Build.BRAND.equals("lava", ignoreCase = true)

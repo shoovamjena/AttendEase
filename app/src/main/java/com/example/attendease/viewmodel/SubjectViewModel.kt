@@ -1,10 +1,10 @@
-package com.example.attendease.model
+package com.example.attendease.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.attendease.subjectdata.Subject
-import com.example.attendease.subjectdata.SubjectRepository
+import com.example.attendease.model.subjectdata.Subject
+import com.example.attendease.model.subjectdata.SubjectRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

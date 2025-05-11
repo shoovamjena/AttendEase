@@ -8,11 +8,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.attendease.UserPreferences
-import com.example.attendease.model.DetailViewModel
-import com.example.attendease.model.MainViewModel
-import com.example.attendease.model.PaymentViewModel
-import com.example.attendease.model.SubjectViewModel
-import com.example.attendease.model.TimetableViewModel
+import com.example.attendease.viewmodel.DetailViewModel
+import com.example.attendease.viewmodel.MainViewModel
+import com.example.attendease.viewmodel.PaymentViewModel
+import com.example.attendease.viewmodel.SubjectViewModel
+import com.example.attendease.viewmodel.TimetableViewModel
 import com.example.attendease.screen.AttendanceDetailExpanded
 import com.example.attendease.screen.DonateScreen
 import com.example.attendease.screen.HomeScreen

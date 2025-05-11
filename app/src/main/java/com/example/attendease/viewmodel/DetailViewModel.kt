@@ -1,18 +1,18 @@
-package com.example.attendease.model
+package com.example.attendease.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.attendease.attendancedata.Attendance
-import com.example.attendease.attendancedata.AttendanceRepository
-import com.example.attendease.subjectdata.Subject
-import com.example.attendease.subjectdata.SubjectRepository
+import com.example.attendease.model.attendancedata.Attendance
+import com.example.attendease.model.attendancedata.AttendanceRepository
+import com.example.attendease.model.subjectdata.Subject
+import com.example.attendease.model.subjectdata.SubjectRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 
-class DetailViewModel(private val repository: AttendanceRepository,private  val subjectRepository: SubjectRepository) : ViewModel() {
+class DetailViewModel(private val repository: AttendanceRepository, private  val subjectRepository: SubjectRepository) : ViewModel() {
 
     private val _attendanceRecords = MutableStateFlow<List<Attendance>>(emptyList())
     val attendanceRecords = _attendanceRecords.asStateFlow()

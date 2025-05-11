@@ -2,26 +2,29 @@ package com.example.attendease.dailogbox
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberTimePickerState
@@ -36,13 +39,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.attendease.model.SubjectViewModel
 import com.example.attendease.ui.theme.nothingFontFamily
+import com.example.attendease.viewmodel.SubjectViewModel
 
 @SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,98 +102,196 @@ fun EditClass(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                // Subject Dropdown
-                Box {
-                    OutlinedTextField(
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp)
+                ) {
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 10.dp),
-                        value = subName,
-                        onValueChange = onSubNameChange,
-                        label = { Text(text = "Edit Subject") },
-                        placeholder = { Text(text = "Choose Subject", fontSize = 11.sp) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                        readOnly = true,
-                        trailingIcon = {
-                            IconButton(onClick = { expandedSubject = !expandedSubject }) {
-                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                            .clickable { expandedSubject = !expandedSubject },
+                        shape = RoundedCornerShape(8.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                        colors = CardDefaults.cardColors(containerColor)
+                    ) {
+                        Text(
+                            text = "Add Subject",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 10.dp)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(60.dp)
+                                .border(
+                                    width = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .padding(16.dp)
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth(),verticalArrangement = Arrangement.Center) {
+
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = subName.ifEmpty { "Choose Subject" },
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = if (subName.isEmpty()) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                        else MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowDropDown,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
-                    )
+                    }
+
                     DropdownMenu(
                         expanded = expandedSubject,
                         onDismissRequest = { expandedSubject = false },
-                        modifier = Modifier.background(containerColor.copy(0.4f)),
+                        modifier = Modifier.background(containerColor.copy(0.4f))
                     ) {
-                        subject.forEach { subject ->
+                        subject.forEach { subjectItem ->
                             DropdownMenuItem(
-                                text = { Text(subject.name) },
+                                text = { Text(subjectItem.name) },
                                 onClick = {
-                                    onSubNameChange(subject.name)
+                                    onSubNameChange(subjectItem.name)
                                     expandedSubject = false
                                 }
                             )
                         }
                     }
                 }
-
-                // Day Dropdown
                 Box {
-                    OutlinedTextField(
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 10.dp),
-                        value = day,
-                        onValueChange = onDayChanged,
-                        label = { Text(text = "Select Day") },
-                        placeholder = { Text(text = "Choose Day", fontSize = 11.sp) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                        readOnly = true,
-                        trailingIcon = {
-                            IconButton(onClick = { expandedDay = !expandedDay }) {
-                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                            .padding(horizontal = 10.dp)
+                            .clickable { expandedDay = !expandedDay },
+                        shape = RoundedCornerShape(8.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                        colors = CardDefaults.cardColors(containerColor)
+                    ) {
+                        Text(
+                            text = "Select Day",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 10.dp)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(60.dp)
+                                .border(
+                                    width = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                                .padding(16.dp)
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth(),verticalArrangement = Arrangement.Center) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = day.ifEmpty { "Choose Day" },
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = if (day.isEmpty()) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                        else MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowDropDown,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
-                    )
+                    }
+
                     DropdownMenu(
                         expanded = expandedDay,
                         onDismissRequest = { expandedDay = false },
                         modifier = Modifier.background(containerColor.copy(0.4f))
                     ) {
-                        days.forEach { d ->
+                        days.forEach { dayItem ->
                             DropdownMenuItem(
-                                text = { Text(d) },
+                                text = { Text(dayItem) },
                                 onClick = {
-                                    onDayChanged(d)
+                                    onDayChanged(dayItem)
                                     expandedDay = false
                                 }
                             )
                         }
                     }
                 }
-
-                // Start Time
-                OutlinedTextField(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 10.dp),
-                    value = startTime,
-                    onValueChange = onStartTimeChanged,
-                    label = { Text(text = "Select Start Time") },
-                    placeholder = { Text(text = "Choose Start Time", fontSize = 11.sp) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    readOnly = true,
-                    trailingIcon = {
-                        IconButton(onClick = { startPicker = true }) {
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                    shape = RoundedCornerShape(8.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    colors = CardDefaults.cardColors(containerColor)
+                ) {
+                    Text(
+                        text = "Select Start Time",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 10.dp)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp)
+                            .clickable { startPicker = true }
+                            .border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .padding(10.dp)
+                    ) {
+                        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = startTime.ifEmpty { "Choose Start Time" },
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = if (startTime.isEmpty()) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    else MaterialTheme.colorScheme.onSurface
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.ArrowDropDown,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
-                )
+                }
                 if (startPicker) {
                     Dialog(onDismissRequest = { startPicker = false }) {
                         Box(
                             modifier = Modifier
-                                .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp))
+                                .background(
+                                    MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(16.dp)
+                                )
                                 .padding(16.dp)
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -205,13 +305,20 @@ fun EditClass(
                                     }
                                     OutlinedButton(onClick = {
                                         val selectedHour = startTimePickerState.hour
-                                        val isPm = selectedHour>=12
-                                        val hourIn12Form = if(selectedHour%12==0)12 else selectedHour%12
-                                        val amPm =if(isPm)"PM" else "AM"
+                                        val isPm = selectedHour >= 12
+                                        val hourIn12Form =
+                                            if (selectedHour % 12 == 0) 12 else selectedHour % 12
+                                        val amPm = if (isPm) "PM" else "AM"
                                         val selectedMinute = startTimePickerState.minute
-                                        val formattedTime = String.format("%02d:%02d %s", hourIn12Form, selectedMinute, amPm)
+                                        val formattedTime = String.format(
+                                            "%02d:%02d %s",
+                                            hourIn12Form,
+                                            selectedMinute,
+                                            amPm
+                                        )
                                         onStartTimeChanged(formattedTime)
-                                        startPicker = false }) {
+                                        startPicker = false
+                                    }) {
                                         Text("OK")
                                     }
                                 }
@@ -219,29 +326,62 @@ fun EditClass(
                         }
                     }
                 }
-
-                // End Time
-                OutlinedTextField(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 10.dp),
-                    value = endTime,
-                    onValueChange = onEndTimeChanged,
-                    label = { Text(text = "Select End Time") },
-                    placeholder = { Text(text = "Choose End Time", fontSize = 11.sp) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    readOnly = true,
-                    trailingIcon = {
-                        IconButton(onClick = { endPicker = true }) {
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                    shape = RoundedCornerShape(8.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    colors = CardDefaults.cardColors(containerColor)
+                ) {
+                    Text(
+                        text = "Select End Time",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 10.dp)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp)
+                            .clickable { endPicker = true }
+                            .border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            .padding(10.dp)
+                    ) {
+                        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = endTime.ifEmpty { "Choose End Time" },
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = if (endTime.isEmpty()) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    else MaterialTheme.colorScheme.onSurface
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.ArrowDropDown,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
-                )
+                }
+
                 if (endPicker) {
                     Dialog(onDismissRequest = { endPicker = false }) {
                         Box(
                             modifier = Modifier
-                                .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(16.dp))
+                                .background(
+                                    MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(16.dp)
+                                )
                                 .padding(16.dp)
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -255,13 +395,20 @@ fun EditClass(
                                     }
                                     OutlinedButton(onClick = {
                                         val selectedHour = endTimePickerState.hour
-                                        val isPm = selectedHour>=12
-                                        val hourIn12Form = if(selectedHour%12==0)12 else selectedHour%12
-                                        val amPm =if(isPm)"PM" else "AM"
+                                        val isPm = selectedHour >= 12
+                                        val hourIn12Form =
+                                            if (selectedHour % 12 == 0) 12 else selectedHour % 12
+                                        val amPm = if (isPm) "PM" else "AM"
                                         val selectedMinute = endTimePickerState.minute
-                                        val formattedTime = String.format("%02d:%02d %s", hourIn12Form, selectedMinute, amPm)
+                                        val formattedTime = String.format(
+                                            "%02d:%02d %s",
+                                            hourIn12Form,
+                                            selectedMinute,
+                                            amPm
+                                        )
                                         onEndTimeChanged(formattedTime)
-                                        endPicker = false }) {
+                                        endPicker = false
+                                    }) {
                                         Text("OK")
                                     }
                                 }
@@ -270,7 +417,6 @@ fun EditClass(
                     }
                 }
 
-                // Action Buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly

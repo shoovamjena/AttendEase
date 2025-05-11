@@ -5,8 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.PowerManager
 import com.example.attendease.UserPreferences
-import com.example.attendease.subjectdata.SubjectDatabase
-import com.example.attendease.timetabledata.TimetableDatabase
+import com.example.attendease.model.subjectdata.SubjectDatabase
+import com.example.attendease.model.timetabledata.TimetableDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -58,7 +58,7 @@ class ClassCheckerReceiver : BroadcastReceiver() {
                         if (subject != null) {
                             val notificationHelper = NotificationHelper(context)
                             notificationHelper.showClassNotification(
-                                classId = timetableEntry.id,
+                                classId = timetableEntry.Id,
                                 subjectName = subject.name,
                                 startTime = timetableEntry.startTime,
                                 attendancePercentage = subject.attendancePercentage,

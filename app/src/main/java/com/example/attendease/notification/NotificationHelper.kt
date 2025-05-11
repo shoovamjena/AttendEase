@@ -18,8 +18,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.attendease.R
 import com.example.attendease.UserPreferences
-import com.example.attendease.subjectdata.SubjectDatabase
-import com.example.attendease.timetabledata.TimetableDatabase
+import com.example.attendease.model.subjectdata.SubjectDatabase
+import com.example.attendease.model.timetabledata.TimetableDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -452,7 +452,7 @@ class AlarmScheduler(private val context: Context) {
                                         context,
                                         ClassNotificationReceiver::class.java
                                     ).apply {
-                                        putExtra("classId", timetableEntry.id)
+                                        putExtra("classId", timetableEntry.Id)
                                         putExtra("subjectName", subject.name)
                                         putExtra("startTime", timetableEntry.startTime)
                                         putExtra(
@@ -464,7 +464,7 @@ class AlarmScheduler(private val context: Context) {
 
                                     val pendingIntent = PendingIntent.getBroadcast(
                                         context,
-                                        timetableEntry.id, // Use class ID as unique request code
+                                        timetableEntry.Id, // Use class ID as unique request code
                                         intent,
                                         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                                     )

@@ -73,8 +73,8 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.attendease.R
 import com.example.attendease.UserPreferences
 import com.example.attendease.dailogbox.DeleteDialog
-import com.example.attendease.model.SubjectViewModel
-import com.example.attendease.model.TimetableViewModel
+import com.example.attendease.viewmodel.SubjectViewModel
+import com.example.attendease.viewmodel.TimetableViewModel
 import com.example.attendease.ui.theme.ThemePreference
 import com.example.attendease.ui.theme.nothingFontFamily
 import com.example.attendease.ui.theme.roundFontFamily
@@ -207,7 +207,7 @@ fun SettingsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 10.dp)
-                            .shadow(26.dp)
+                            .shadow(26.dp, shape = RoundedCornerShape(50))
                             .clip(RoundedCornerShape(percent = 50))
                             .background(contentColor.copy(alpha = 0.1f)),
                     ) {

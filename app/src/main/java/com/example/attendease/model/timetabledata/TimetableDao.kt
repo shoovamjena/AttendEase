@@ -1,4 +1,4 @@
-package com.example.attendease.timetabledata
+package com.example.attendease.model.timetabledata
 
 import androidx.room.*
 

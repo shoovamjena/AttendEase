@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -40,11 +39,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlurEffect
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -57,17 +53,19 @@ import androidx.navigation.compose.rememberNavController
 import com.example.attendease.UserPreferences
 import com.example.attendease.dailogbox.AddClass
 import com.example.attendease.dailogbox.EditClass
-import com.example.attendease.model.SubjectViewModel
-import com.example.attendease.model.TimetableViewModel
+import com.example.attendease.model.timetabledata.Timetable
 import com.example.attendease.notification.AlarmScheduler
-import com.example.attendease.timetabledata.Timetable
 import com.example.attendease.ui.theme.ThemePreference
 import com.example.attendease.ui.theme.nothingFontFamily
 import com.example.attendease.ui.theme.roundFontFamily
+import com.example.attendease.uicomponent.HorizontalEdgeGradient
 import com.example.attendease.uicomponent.TimeTableItem
+import com.example.attendease.uicomponent.VerticalEdgeGradient
 import com.example.attendease.uicomponent.Weekly
 import com.example.attendease.uicomponent.bottomnavbar.BottomNavNoAnimation
 import com.example.attendease.uicomponent.bottomnavbar.Screen
+import com.example.attendease.viewmodel.SubjectViewModel
+import com.example.attendease.viewmodel.TimetableViewModel
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
@@ -194,7 +192,7 @@ fun TimeTableScreen(
                 if(subName.isNotEmpty() && start.isBefore(end)){
                     selectedClass?.let { timetable ->
                         timeViewModel.updateClass(
-                            id = timetable.id,
+                            id = timetable.Id,
                             className = subName,
                             day = selectedDay,
                             startTime = firstTime,
@@ -242,7 +240,7 @@ fun TimeTableScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 10.dp)
-                            .shadow(26.dp)
+                            .shadow(16.dp, shape = RoundedCornerShape(50))
                             .clip(RoundedCornerShape(percent = 50))
                             .background(contentColor.copy(alpha = 0.1f)),
                     ) {
@@ -308,14 +306,15 @@ fun TimeTableScreen(
                                 .fillMaxSize()
                                 .heightIn(min = 500.dp)
                                 .padding(top = 25.dp, bottom = 30.dp, start = 10.dp, end = 10.dp)
+                                .shadow(5.dp, shape = RoundedCornerShape(20.dp))
                                 .clip(RoundedCornerShape(20.dp))
-                                .background(contentColor.copy(alpha = 0.9f))
+                                .background(contentColor)
                         ) {
                             val timeTableList = timeViewModel.classesForDate.collectAsState().value
                             if(timeTableList.isEmpty()){
                                 Text(
                                     text = "Click the + icon to add classes",
-                                    fontSize = 22.sp,
+                                    fontSize = 18.sp,
                                     fontFamily = nothingFontFamily,
                                     color = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.align(Alignment.Center)
@@ -348,48 +347,26 @@ fun TimeTableScreen(
                                     }
                                 }
                             }
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(30.dp)
-                                    .align(Alignment.BottomCenter)
-                                    .drawWithCache {
-                                        onDrawBehind {
-                                            // Draw Background Gradient
-                                            drawRect(
-                                                Brush.linearGradient(
-                                                    colors = listOf(
-                                                        contentColor,
-                                                        Color.Transparent
-                                                    ),
-                                                    start = Offset(0f, size.height),
-                                                    end = Offset(0f, 0f)
-                                                )
-                                            )
-                                        }
-                                    }
-                            ) { }
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(30.dp)
-                                    .align(Alignment.TopCenter)
-                                    .drawWithCache {
-                                        onDrawBehind {
-                                            // Draw Background Gradient
-                                            drawRect(
-                                                Brush.linearGradient(
-                                                    colors = listOf(
-                                                        Color.Transparent,
-                                                        contentColor
-                                                    ),
-                                                    start = Offset(0f, size.height),
-                                                    end = Offset(0f, 0f)
-                                                )
-                                            )
-                                        }
-                                    }
-                            ) { }
+                            VerticalEdgeGradient(
+                                modifier = Modifier.align(Alignment.BottomCenter),
+                                color1 = contentColor,
+                                color2 = Color.Transparent
+                            )
+                            VerticalEdgeGradient(
+                                modifier = Modifier.align(Alignment.TopCenter),
+                                color1 = Color.Transparent,
+                                color2 = contentColor
+                            )
+                            HorizontalEdgeGradient(
+                                modifier = Modifier.align(Alignment.CenterStart),
+                                color1 = contentColor,
+                                color2 = Color.Transparent
+                            )
+                            HorizontalEdgeGradient(
+                                modifier = Modifier.align(Alignment.CenterEnd),
+                                color1 = Color.Transparent,
+                                color2 = contentColor
+                            )
 
                             IconButton(
                                 onClick = { addClassDialog=true },

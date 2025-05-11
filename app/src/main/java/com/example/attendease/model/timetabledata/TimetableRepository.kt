@@ -1,7 +1,7 @@
-package com.example.attendease.timetabledata
+package com.example.attendease.model.timetabledata
 
-import com.example.attendease.subjectdata.Subject
-import com.example.attendease.subjectdata.SubjectDao
+import com.example.attendease.model.subjectdata.Subject
+import com.example.attendease.model.subjectdata.SubjectDao
 
 
 class TimetableRepository(private val dao: TimetableDao) {

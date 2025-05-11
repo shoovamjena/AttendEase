@@ -1,4 +1,4 @@
-package com.example.attendease.subjectdata
+package com.example.attendease.model.subjectdata
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

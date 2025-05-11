@@ -52,8 +52,8 @@ import com.example.attendease.R
 import com.example.attendease.UserPreferences
 import com.example.attendease.dailogbox.DeleteDialog
 import com.example.attendease.dailogbox.ResetDialog
-import com.example.attendease.model.DetailViewModel
-import com.example.attendease.subjectdata.Subject
+import com.example.attendease.viewmodel.DetailViewModel
+import com.example.attendease.model.subjectdata.Subject
 import com.example.attendease.ui.theme.nothingFontFamily
 import kotlin.math.ceil
 
