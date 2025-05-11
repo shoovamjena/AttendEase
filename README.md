@@ -6,7 +6,7 @@ _Made with ❤️ by Shoovam aka Ironheart_
 [![Made with Kotlin](https://img.shields.io/badge/Made%20with-Kotlin-7F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)  
 [![Jetpack Compose](https://img.shields.io/badge/UI%20Toolkit-Jetpack%20Compose-4285F4?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/jetpack/compose)  
 [![Room Database](https://img.shields.io/badge/Storage-Room%20DB-6DB33F?style=for-the-badge&logo=sqlite&logoColor=white)](https://developer.android.com/jetpack/androidx/releases/room)  
-[![Download APK](https://img.shields.io/badge/Download-APK-blue.svg?style=for-the-badge&logo=android)](https://drive.google.com/uc?export=download&id=1foR-piXQX8h7r2zpznPSkE6PQFGDIfJV)
+[![Download APK (android 9+)](https://img.shields.io/badge/Download-APK-blue.svg?style=for-the-badge&logo=android)](https://drive.google.com/uc?export=download&id=182kutOOPGZSybzf3RaajaxVkKA8pZ-8Z)
 
 ---
 
@@ -107,9 +107,9 @@ A one-man indie dev passion project – crafted to help students stay in control
 
 ## **🧪 How to Run Locally**
 
-[![Download APK](https://img.shields.io/badge/Download-APK-blue.svg?style=for-the-badge&logo=android)](https://drive.google.com/uc?export=download&id=1foR-piXQX8h7r2zpznPSkE6PQFGDIfJV)
+[![Download APK](https://img.shields.io/badge/Download-APK-blue.svg?style=for-the-badge&logo=android)](https://drive.google.com/uc?export=download&id=182kutOOPGZSybzf3RaajaxVkKA8pZ-8Z)
 
-_**👉 Click the badge above to download the latest APK**_
+_**👉 Click the badge above to download the latest APK (ANDROID 9+)**_
 
 Or, build it yourself:
 
