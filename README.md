@@ -3,6 +3,8 @@
 **Track smart. Stay focused. Beat the shortage.**  
 _Made with ❤️ by Shoovam aka Ironheart_
 
+### *To be renamed to **AttendElite** for Google Play Launch*
+
 [![Made with Kotlin](https://img.shields.io/badge/Made%20with-Kotlin-7F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)  
 [![Jetpack Compose](https://img.shields.io/badge/UI%20Toolkit-Jetpack%20Compose-4285F4?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/jetpack/compose)  
 [![Room Database](https://img.shields.io/badge/Storage-Room%20DB-6DB33F?style=for-the-badge&logo=sqlite&logoColor=white)](https://developer.android.com/jetpack/androidx/releases/room)  
