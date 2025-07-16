@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AttendEase</string>
+    <string name="app_name">AttendElite</string>
     <string name="title_activity_choose_colour">ChooseColour</string>
     <string name="title_activity_splash_screen">SplashScreen</string>
 </resources>

@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-05-09T11:54:41.237917700Z">
+        <DropdownSelection timestamp="2025-05-18T13:02:37.789777Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\shoov\.android\avd\NARZO_API_30.avd" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\shoov\.android\avd\Pixel_8_Pro_API_Baklava.avd" />
             </handle>
           </Target>
         </DropdownSelection>

@@ -19,7 +19,7 @@ A one-man indie dev passion project – crafted to help students stay in control
 ---
 
 ## **📸 Promo Banner**
-![Promo](app/src/main/java/com/example/attendease/demo/poster.png)
+![Promo](app/src/main/java/com/ironheartproduction/attendelite/demo/poster.png)
 
 ---
 
@@ -138,7 +138,7 @@ Or, build it yourself:
 
 | Light Theme | Dark Theme |
 |-------------|------------|
-| ![Home Light](app/src/main/java/com/example/attendease/demo/homelight.jpg) | ![Home Dark](app/src/main/java/com/example/attendease/demo/homedark.jpg) |
+| ![Home Light](app/src/main/java/com/ironheartproduction/attendelite/demo/homelight.jpg) | ![Home Dark](app/src/main/java/com/ironheartproduction/attendelite/demo/homedark.jpg) |
 
 ---
 
@@ -146,7 +146,7 @@ Or, build it yourself:
 
 | Light Theme | Dark Theme |
 |-------------|------------|
-| ![Timetable Light](app/src/main/java/com/example/attendease/demo/timetablelight.jpg) | ![Timetable Dark](app/src/main/java/com/example/attendease/demo/timetabledark.jpg) |
+| ![Timetable Light](app/src/main/java/com/ironheartproduction/attendelite/demo/timetablelight.jpg) | ![Timetable Dark](app/src/main/java/com/ironheartproduction/attendelite/demo/timetabledark.jpg) |
 
 ---
 
@@ -154,7 +154,7 @@ Or, build it yourself:
 
 | Light Theme | Dark Theme |
 |-------------|------------|
-| ![Support Light](app/src/main/java/com/example/attendease/demo/supportlight.jpg) | ![Support Dark](app/src/main/java/com/example/attendease/demo/supportdark.jpg) |
+| ![Support Light](app/src/main/java/com/ironheartproduction/attendelite/demo/supportlight.jpg) | ![Support Dark](app/src/main/java/com/ironheartproduction/attendelite/demo/supportdark.jpg) |
 
 ---
 
@@ -162,13 +162,13 @@ Or, build it yourself:
 
 | Light Theme | Dark Theme |
 |-------------|------------|
-| ![Settings Light](app/src/main/java/com/example/attendease/demo/settingslight.jpg) | ![Settings Dark](app/src/main/java/com/example/attendease/demo/settingsdark.jpg) |
+| ![Settings Light](app/src/main/java/com/ironheartproduction/attendelite/demo/settingslight.jpg) | ![Settings Dark](app/src/main/java/com/ironheartproduction/attendelite/demo/settingsdark.jpg) |
 
 ---
 
 ### **📊 Attendance Detail Screen**
 
-![Attendance Detail](app/src/main/java/com/example/attendease/demo/detail.jpg)
+![Attendance Detail](app/src/main/java/com/ironheartproduction/attendelite/demo/detail.jpg)
 
 ---
 
@@ -176,7 +176,7 @@ Or, build it yourself:
 
 | Cyan | Pink | Orange | Green |
 |------|------|--------|-------|
-| ![Cyan](app/src/main/java/com/example/attendease/demo/cyanlight.jpg) | ![Pink](app/src/main/java/com/example/attendease/demo/pinklight.jpg) |![Orange](app/src/main/java/com/example/attendease/demo/orangelight.jpg) | ![Green](app/src/main/java/com/example/attendease/demo/greenlight.jpg) |
+| ![Cyan](app/src/main/java/com/ironheartproduction/attendelite/demo/cyanlight.jpg) | ![Pink](app/src/main/java/com/ironheartproduction/attendelite/demo/pinklight.jpg) |![Orange](app/src/main/java/com/ironheartproduction/attendelite/demo/orangelight.jpg) | ![Green](app/src/main/java/com/ironheartproduction/attendelite/demo/greenlight.jpg) |
 
 ---
 
@@ -184,7 +184,7 @@ Or, build it yourself:
 
 | Cyan | Pink | Orange | Green |
 |------|------|--------|-------|
-| ![Cyan](app/src/main/java/com/example/attendease/demo/cyandark.jpg) | ![Pink](app/src/main/java/com/example/attendease/demo/pinkdark.jpg) |![Orange](app/src/main/java/com/example/attendease/demo/orangedark.jpg) | ![Green](app/src/main/java/com/example/attendease/demo/greendark.jpg) |
+| ![Cyan](app/src/main/java/com/ironheartproduction/attendelite/demo/cyandark.jpg) | ![Pink](app/src/main/java/com/ironheartproduction/attendelite/demo/pinkdark.jpg) |![Orange](app/src/main/java/com/ironheartproduction/attendelite/demo/orangedark.jpg) | ![Green](app/src/main/java/com/ironheartproduction/attendelite/demo/greendark.jpg) |
 
 ---
 

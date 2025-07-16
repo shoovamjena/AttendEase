@@ -6,15 +6,15 @@ plugins {
 }
 
 android {
-    namespace = "com.example.attendease"
+    namespace = "com.ironheartproduction.attendelite"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.attendease"
+        applicationId = "com.ironheartproduction.attendelite"
         minSdk = 28
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
