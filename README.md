@@ -20,11 +20,6 @@ A one-man indie dev passion project – crafted to help students stay in control
 
 ---
 
-## **📸 Promo Banner**
-![Promo](app/src/main/java/com/ironheartproduction/attendelite/demo/poster.png)
-
----
-
 ## **🧰 Tech Stack & Tools Used**
 | **Tool** | **Purpose** |
 |------|---------|
@@ -130,63 +125,6 @@ Or, build it yourself:
 ⚠️ **Make sure:**
 - ✅ Gradle is synced
 - ✅ Required permissions (Notifications, Alarms) are granted
-
----
-
-
-## **📸 Screenshots**
-
-### **🏠 Home Screen**
-
-| Light Theme | Dark Theme |
-|-------------|------------|
-| ![Home Light](app/src/main/java/com/ironheartproduction/attendelite/demo/homelight.jpg) | ![Home Dark](app/src/main/java/com/ironheartproduction/attendelite/demo/homedark.jpg) |
-
----
-
-### **📅 Timetable View**
-
-| Light Theme | Dark Theme |
-|-------------|------------|
-| ![Timetable Light](app/src/main/java/com/ironheartproduction/attendelite/demo/timetablelight.jpg) | ![Timetable Dark](app/src/main/java/com/ironheartproduction/attendelite/demo/timetabledark.jpg) |
-
----
-
-### **💸 Support Screen**
-
-| Light Theme | Dark Theme |
-|-------------|------------|
-| ![Support Light](app/src/main/java/com/ironheartproduction/attendelite/demo/supportlight.jpg) | ![Support Dark](app/src/main/java/com/ironheartproduction/attendelite/demo/supportdark.jpg) |
-
----
-
-### **⚙️ Settings Screen**
-
-| Light Theme | Dark Theme |
-|-------------|------------|
-| ![Settings Light](app/src/main/java/com/ironheartproduction/attendelite/demo/settingslight.jpg) | ![Settings Dark](app/src/main/java/com/ironheartproduction/attendelite/demo/settingsdark.jpg) |
-
----
-
-### **📊 Attendance Detail Screen**
-
-![Attendance Detail](app/src/main/java/com/ironheartproduction/attendelite/demo/detail.jpg)
-
----
-
-### **🎨 Material Theme Light**
-
-| Cyan | Pink | Orange | Green |
-|------|------|--------|-------|
-| ![Cyan](app/src/main/java/com/ironheartproduction/attendelite/demo/cyanlight.jpg) | ![Pink](app/src/main/java/com/ironheartproduction/attendelite/demo/pinklight.jpg) |![Orange](app/src/main/java/com/ironheartproduction/attendelite/demo/orangelight.jpg) | ![Green](app/src/main/java/com/ironheartproduction/attendelite/demo/greenlight.jpg) |
-
----
-
-### **🌙 Material Theme Dark**
-
-| Cyan | Pink | Orange | Green |
-|------|------|--------|-------|
-| ![Cyan](app/src/main/java/com/ironheartproduction/attendelite/demo/cyandark.jpg) | ![Pink](app/src/main/java/com/ironheartproduction/attendelite/demo/pinkdark.jpg) |![Orange](app/src/main/java/com/ironheartproduction/attendelite/demo/orangedark.jpg) | ![Green](app/src/main/java/com/ironheartproduction/attendelite/demo/greendark.jpg) |
 
 ---
 
