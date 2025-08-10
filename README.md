@@ -190,14 +190,6 @@ Or, build it yourself:
 
 ---
 
-## **🎥 App Demo**
-
-| App Walkthrough | Notification Demo |
-|-----------------|-------------------|
-| https://github.com/user-attachments/assets/dbeecf48-d01d-4513-91d5-0b028b9ca753 | https://github.com/user-attachments/assets/c0a25e94-2c58-4c11-b950-3099f0d2e1b5 |
-
----
-
 ## **🤝 Support & Feedback**
 ### If you love this project, help it grow:
 ---
